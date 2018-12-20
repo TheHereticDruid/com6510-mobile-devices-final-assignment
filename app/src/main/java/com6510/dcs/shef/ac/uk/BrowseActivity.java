@@ -7,7 +7,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -19,6 +21,7 @@ import android.support.v7.widget.RecyclerView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
@@ -32,6 +35,8 @@ public class BrowseActivity extends AppCompatActivity {
     private List<ImageElement> myPictureList = new ArrayList<>();
     private RecyclerView.Adapter  mAdapter;
     private RecyclerView mRecyclerView;
+    private MediaStore.Images.Media mediastore;
+    private Object permissionsGranted = new Object();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +49,6 @@ public class BrowseActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
         mAdapter= new BrowseAdapter(myPictureList);
         mRecyclerView.setAdapter(mAdapter);
-
-        initData();
 
         // required by Android 6.0 +
         checkPermissions(getApplicationContext());
@@ -69,7 +72,36 @@ public class BrowseActivity extends AppCompatActivity {
                 EasyImage.openCamera(getActivity(), 0);
             }
         });
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refresh_gallery();
+    }
+
+    private void refresh_gallery() {
+        System.out.println("Refreshing gallery");
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            initData();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (permissions.length == 0) {
+            System.out.println("Permissions empty, returning");
+            return;
+        }
+
+        for (String p : permissions) {
+            if (p == Manifest.permission.READ_EXTERNAL_STORAGE) {
+                System.out.println("Read permission granted, refreshing gallery");
+                refresh_gallery();
+            }
+        }
     }
 
     /**
@@ -87,6 +119,19 @@ public class BrowseActivity extends AppCompatActivity {
      * artificial init of the data so to upload some images as a starting point
      */
     private void initData() {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = MediaStore.Images.Media.query(this.getContentResolver(),
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                projection);
+        System.out.println("Found " + cursor.getCount() + " images.");
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            String path = cursor.getString(cursor.getColumnIndex("_data"));
+            myPictureList.add(new ImageElement(new File(path)));
+            System.out.println(path);
+            cursor.moveToNext();
+        }
+        mAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -98,6 +143,7 @@ public class BrowseActivity extends AppCompatActivity {
     private void checkPermissions(final Context context) {
         int currentAPIVersion = Build.VERSION.SDK_INT;
         if (currentAPIVersion >= android.os.Build.VERSION_CODES.M) {
+            /* Check read permission */
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     android.support.v7.app.AlertDialog.Builder alertBuilder = new android.support.v7.app.AlertDialog.Builder(context);
@@ -118,6 +164,7 @@ public class BrowseActivity extends AppCompatActivity {
                 }
 
             }
+            /* Check write permission */
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     android.support.v7.app.AlertDialog.Builder alertBuilder = new android.support.v7.app.AlertDialog.Builder(context);
@@ -138,14 +185,8 @@ public class BrowseActivity extends AppCompatActivity {
                 }
 
             }
-
-
         }
     }
-
-
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -169,7 +210,6 @@ public class BrowseActivity extends AppCompatActivity {
             }
         });
     }
-
 
     /**
      * add the selected images to the grid
@@ -200,7 +240,4 @@ public class BrowseActivity extends AppCompatActivity {
     public Activity getActivity() {
         return this;
     }
-
-
-
 }
