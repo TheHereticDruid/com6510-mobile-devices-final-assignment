@@ -40,9 +40,8 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
 
     @Override
     public void onBindViewHolder(final View_Holder holder, final int position) {
-
-        //Use the provided View Holder on the onCreateViewHolder method to populate the
-        // current row on the RecyclerView
+        /* Use the provided View Holder on the onCreateViewHolder method to populate the
+           current row on the RecyclerView */
         if (holder!=null && items.get(position)!=null) {
             Bitmap myBitmap = BitmapFactory.decodeFile(items.get(position).file.getAbsolutePath());
             holder.imageView.setImageBitmap(myBitmap);
@@ -58,8 +57,6 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
         //animate(holder);
     }
 
-
-    // convenience method for getting data at click position
     ImageElement getItem(int id) {
         return items.get(id);
     }

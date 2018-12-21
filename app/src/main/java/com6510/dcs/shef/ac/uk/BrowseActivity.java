@@ -22,7 +22,9 @@ import android.support.v7.widget.RecyclerView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
@@ -32,30 +34,29 @@ public class BrowseActivity extends AppCompatActivity {
 
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 2987;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 7829;
-    private List<ImageElement> myPictureList = new ArrayList<>();
-    private RecyclerView.Adapter  mAdapter;
-    private RecyclerView mRecyclerView;
-    private MediaStore.Images.Media mediastore;
-    private Object permissionsGranted = new Object();
+    private List<ImageElement> images = new ArrayList<>();
+    private RecyclerView.Adapter adapter;
+    private RecyclerView recycler_view;
+    private Set<String> granted_permissions = new HashSet<>(); 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_browse);
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.grid_recycler_view);
-        // set up the RecyclerView
+        recycler_view = (RecyclerView) findViewById(R.id.grid_recycler_view);
         int numberOfColumns = 4;
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
-        mAdapter= new BrowseAdapter(myPictureList);
-        mRecyclerView.setAdapter(mAdapter);
+        recycler_view.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
+        adapter= new BrowseAdapter(images);
+        recycler_view.setAdapter(adapter);
 
-        // required by Android 6.0 +
+        /* Required by Android 6.0+ */
         checkPermissions(getApplicationContext());
 
+        /* Initialize easyimage */
         initEasyImage();
 
-        // the floating button that will allow us to get the images from the Gallery
+        /* Floating button to manually add images from gallery */
         FloatingActionButton fabGallery = (FloatingActionButton) findViewById(R.id.fab_gallery);
         fabGallery.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,7 +65,7 @@ public class BrowseActivity extends AppCompatActivity {
             }
         });
 
-        // the floating button that will take images from camera.
+        /* Floating button to take images from camera */
         FloatingActionButton fabCamera = (FloatingActionButton) findViewById(R.id.fab_camera);
         fabCamera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,13 +78,29 @@ public class BrowseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        System.out.println("Refreshing gallery on resume");
         refresh_gallery();
     }
 
-    private void refresh_gallery() {
-        System.out.println("Refreshing gallery");
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            initData();
+    private synchronized void refresh_gallery() {
+        /* Only refresh if read permission is granted */
+        if (granted_permissions.contains(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            String[] projection = {MediaStore.Images.Media.DATA};
+            Cursor cursor = MediaStore.Images.Media.query(this.getContentResolver(),
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    projection);
+            System.out.println("Found " + cursor.getCount() + " images.");
+            List<ImageElement> found_images = new ArrayList<ImageElement>();
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                String path = cursor.getString(cursor.getColumnIndex("_data"));
+                found_images.add(new ImageElement(new File(path)));
+                System.out.println(path);
+                cursor.moveToNext();
+            }
+            images.clear();
+            images.addAll(found_images);
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -91,47 +108,25 @@ public class BrowseActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (permissions.length == 0) {
-            System.out.println("Permissions empty, returning");
-            return;
-        }
-
-        for (String p : permissions) {
-            if (p == Manifest.permission.READ_EXTERNAL_STORAGE) {
-                System.out.println("Read permission granted, refreshing gallery");
-                refresh_gallery();
+        /* Update set of granted permissions */
+        granted_permissions.clear();
+        for (int i=0; i < permissions.length; i++) {
+            if (grantResults[i] == 0) {
+                granted_permissions.add(permissions[i]);
             }
         }
+
+        /* Refresh gallery if needed */
+        System.out.println("Refreshing gallery on permission callback");
+        refresh_gallery();
     }
 
-    /**
-     * it initialises EasyImage
-     */
     private void initEasyImage() {
         EasyImage.configuration(this)
                 .setImagesFolderName("EasyImage sample")
                 .setCopyTakenPhotosToPublicGalleryAppFolder(true)
                 .setCopyPickedImagesToPublicGalleryAppFolder(false)
                 .setAllowMultiplePickInGallery(true);
-    }
-
-    /**
-     * artificial init of the data so to upload some images as a starting point
-     */
-    private void initData() {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = MediaStore.Images.Media.query(this.getContentResolver(),
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                projection);
-        System.out.println("Found " + cursor.getCount() + " images.");
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            String path = cursor.getString(cursor.getColumnIndex("_data"));
-            myPictureList.add(new ImageElement(new File(path)));
-            System.out.println(path);
-            cursor.moveToNext();
-        }
-        mAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -160,9 +155,9 @@ public class BrowseActivity extends AppCompatActivity {
                     alert.show();
 
                 } else {
+                    System.out.println("Requesting read permission");
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE);
                 }
-
             }
             /* Check write permission */
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -181,9 +176,9 @@ public class BrowseActivity extends AppCompatActivity {
                     alert.show();
 
                 } else {
+                    System.out.println("Requesting write permission");
                     ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
                 }
-
             }
         }
     }
@@ -195,46 +190,22 @@ public class BrowseActivity extends AppCompatActivity {
         EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
-                //Some error handling
                 e.printStackTrace();
             }
 
             @Override
             public void onImagesPicked(List<File> imageFiles, EasyImage.ImageSource source, int type) {
-                onPhotosReturned(imageFiles);
+                for (File f : imageFiles) {
+                    images.add(new ImageElement(f));
+                }
+                adapter.notifyDataSetChanged();
+                recycler_view.scrollToPosition(imageFiles.size() - 1);
             }
 
             @Override
             public void onCanceled(EasyImage.ImageSource source, int type) {
-
             }
         });
-    }
-
-    /**
-     * add the selected images to the grid
-     * @param returnedPhotos
-     */
-    private void onPhotosReturned(List<File> returnedPhotos) {
-        myPictureList.addAll(getImageElements(returnedPhotos));
-        // we tell the adapter that the data is changed and hence the grid needs
-        // refreshing
-        mAdapter.notifyDataSetChanged();
-        mRecyclerView.scrollToPosition(returnedPhotos.size() - 1);
-    }
-
-    /**
-     * given a list of photos, it creates a list of myElements
-     * @param returnedPhotos
-     * @return
-     */
-    private List<ImageElement> getImageElements(List<File> returnedPhotos) {
-        List<ImageElement> imageElementList= new ArrayList<>();
-        for (File file: returnedPhotos){
-            ImageElement element= new ImageElement(file);
-            imageElementList.add(element);
-        }
-        return imageElementList;
     }
 
     public Activity getActivity() {
