@@ -2,7 +2,7 @@ package com6510.dcs.shef.ac.uk.gallery;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Example local unit test, which will execute on the development machine (host).

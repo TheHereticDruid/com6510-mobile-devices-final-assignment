@@ -10,13 +10,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import java.io.File;
 import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
 public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holder> {
-    static private Context context;
-    private static List<ImageElement> items;
+    private Context context;
+    private List<ImageElement> items;
 
     public BrowseAdapter(List<ImageElement> items) {
         this.items = items;
@@ -43,7 +44,8 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
         /* Use the provided View Holder on the onCreateViewHolder method to populate the
            current row on the RecyclerView */
         if (holder!=null && items.get(position)!=null) {
-            Bitmap myBitmap = BitmapFactory.decodeFile(items.get(position).file.getAbsolutePath());
+            File f = new File(items.get(position).getImPath());
+            Bitmap myBitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
             holder.imageView.setImageBitmap(myBitmap);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -66,21 +68,20 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
         return items.size();
     }
 
+    public List<ImageElement> getItems() {
+        return items;
+    }
+
+    public void setItems(List<ImageElement> items) {
+        this.items = items;
+    }
+
     public class View_Holder extends RecyclerView.ViewHolder  {
         ImageView imageView;
 
         View_Holder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.image_item);
-
         }
-    }
-
-    public static List<ImageElement> getItems() {
-        return items;
-    }
-
-    public static void setItems(List<ImageElement> items) {
-        BrowseAdapter.items = items;
     }
 }
