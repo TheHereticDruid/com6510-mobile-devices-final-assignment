@@ -4,17 +4,17 @@ import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 
 @Entity(indices = {@Index(value = {"im_path"}, unique = true)})
-public class ImageElement {
+public class Photo {
     @PrimaryKey
-    private int imId;
-
+    @NonNull
     @ColumnInfo(name = "im_path")
     private String imPath;
 
-    @ColumnInfo(name = "im_th_path")
-    private String imThPath;
+    @ColumnInfo(name = "im_thumb_path")
+    private String imThumbPath;
 
     @ColumnInfo(name = "im_title")
     private String imTitle;
@@ -25,16 +25,8 @@ public class ImageElement {
     @ColumnInfo(name = "im_timestamp")
     private int imTimestamp;
 
-    public ImageElement(String imPath) {
+    public Photo(String imPath) {
         this.imPath = imPath;
-    }
-
-    public int getImId() {
-        return imId;
-    }
-
-    public void setImId(int imId) {
-        this.imId = imId;
     }
 
     public String getImPath() {
@@ -45,12 +37,12 @@ public class ImageElement {
         this.imPath = imPath;
     }
 
-    public String getImThPath() {
-        return imThPath;
+    public String getImThumbPath() {
+        return imThumbPath;
     }
 
-    public void setImThPath(String imThPath) {
-        this.imThPath = imThPath;
+    public void setImThumbPath(String imThumbPath) {
+        this.imThumbPath = imThumbPath;
     }
 
     public String getImTitle() {

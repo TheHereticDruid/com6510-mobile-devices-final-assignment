@@ -8,26 +8,28 @@ import android.arch.lifecycle.MutableLiveData;
 import java.util.List;
 
 public class GalleryViewModel extends AndroidViewModel {
-    private final GalleryRepository repository;
-
-    LiveData<List<ImageElement>> imageElements;
+    private GalleryRepository repository;
+    private LiveData<List<Photo>> photos;
 
     public GalleryViewModel(Application application) {
         super(application);
         /* create connection to repository */
         repository = new GalleryRepository(application);
         /* subscribe to live data */
-        imageElements = repository.getImageElements();
+        photos = repository.getAllPhotos();
     }
 
-    LiveData<List<ImageElement>> getImageElements() {
-        if (imageElements == null) {
-            imageElements = new MutableLiveData<List<ImageElement>>();
-        }
-        return imageElements;
+    LiveData<List<Photo>> getAllPhotos() {
+        return photos;
     }
 
+    void insert(Photo photo) {
+        repository.insert(photo);
+    }
+
+    /*
     public void scan() {
         repository.scan();
     }
+    */
 }

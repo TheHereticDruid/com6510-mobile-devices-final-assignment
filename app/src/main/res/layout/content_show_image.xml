@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com6510.dcs.shef.ac.uk.ShowImageActivity"
+    tools:context="com6510.dcs.shef.ac.uk.ShowPhotoActivity"
     tools:showIn="@layout/activity_show_image">
 
 </android.support.constraint.ConstraintLayout>

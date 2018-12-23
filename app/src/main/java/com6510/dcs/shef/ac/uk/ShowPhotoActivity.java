@@ -9,7 +9,7 @@ import android.view.View;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
-public class ShowImageActivity extends AppCompatActivity {
+public class ShowPhotoActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

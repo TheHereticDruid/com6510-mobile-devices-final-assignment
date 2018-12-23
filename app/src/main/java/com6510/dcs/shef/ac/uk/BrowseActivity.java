@@ -37,7 +37,7 @@ import pl.aprilapps.easyphotopicker.EasyImage;
 public class BrowseActivity extends AppCompatActivity {
     
     /* MVVM stuff */
-    LiveData<List<ImageElement>> imageElements;
+    LiveData<List<Photo>> photos;
     private GalleryViewModel viewModel;
 
     private RecyclerView recycler_view;
@@ -49,7 +49,6 @@ public class BrowseActivity extends AppCompatActivity {
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 2987;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 7829;
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,10 +56,10 @@ public class BrowseActivity extends AppCompatActivity {
 
         /* set up live data */
         viewModel = ViewModelProviders.of(this).get(GalleryViewModel.class);
-        viewModel.getImageElements().observe(this, new Observer<List<ImageElement>>(){
+        viewModel.getAllPhotos().observe(this, new Observer<List<Photo>>(){
             @Override
-            public void onChanged(@Nullable final List<ImageElement> images) {
-                adapter.setItems(images);
+            public void onChanged(@Nullable final List<Photo> photos) {
+                adapter.setPhotos(photos); /* update photos in the adapter */
             }});
 
         /* set up grid */
@@ -68,7 +67,7 @@ public class BrowseActivity extends AppCompatActivity {
         int numberOfColumns = 4;
         recycler_view.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
 
-        /* floating button to manually add images from gallery */
+        /* floating button to manually add photos from gallery */
         FloatingActionButton fabGallery = (FloatingActionButton) findViewById(R.id.fab_gallery);
         fabGallery.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,7 +76,7 @@ public class BrowseActivity extends AppCompatActivity {
             }
         });
 
-        /* floating button to take images from camera */
+        /* floating button to take photos from camera */
         FloatingActionButton fabCamera = (FloatingActionButton) findViewById(R.id.fab_camera);
         fabCamera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,13 +100,13 @@ public class BrowseActivity extends AppCompatActivity {
         /* initialize easyimage */
         initEasyImage();
 
-        /* tell model to load images */
+        /* tell model to load photos */
         System.out.println("Running scan");
-        viewModel.scan();
+        //viewModel.scan();
 
-        //List<ImageElement> images = imageElements.getValue();
-        //System.out.println("Got " + images.size() + " from live data");
-        //adapter = new BrowseAdapter(images);
+        //List<Photo> photos = photos.getValue();
+        //System.out.println("Got " + photos.size() + " from live data");
+        //adapter = new BrowseAdapter(photos);
         //recycler_view.setAdapter(adapter);
     }
 
@@ -148,7 +147,7 @@ public class BrowseActivity extends AppCompatActivity {
             public void onImagesPicked(List<File> imageFiles, EasyImage.ImageSource source, int type) {
 /*
                 for (File f : imageFiles) {
-                    images.add(new ImageElement(f));
+                    photos.add(new Photo(f));
                 }
                 adapter.notifyDataSetChanged();
                 recycler_view.scrollToPosition(imageFiles.size() - 1);
