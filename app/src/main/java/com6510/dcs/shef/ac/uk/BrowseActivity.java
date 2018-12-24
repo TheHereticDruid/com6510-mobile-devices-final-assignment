@@ -67,6 +67,11 @@ public class BrowseActivity extends AppCompatActivity {
         int numberOfColumns = 4;
         recycler_view.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
 
+        /* set recycle view adapter */
+
+        adapter = new BrowseAdapter(this);
+        recycler_view.setAdapter(adapter);
+
         /* floating button to manually add photos from gallery */
         FloatingActionButton fabGallery = (FloatingActionButton) findViewById(R.id.fab_gallery);
         fabGallery.setOnClickListener(new View.OnClickListener() {
@@ -103,11 +108,6 @@ public class BrowseActivity extends AppCompatActivity {
         /* tell model to load photos */
         System.out.println("Running scan");
         //viewModel.scan();
-
-        //List<Photo> photos = photos.getValue();
-        //System.out.println("Got " + photos.size() + " from live data");
-        //adapter = new BrowseAdapter(photos);
-        //recycler_view.setAdapter(adapter);
     }
 
     @Override

@@ -16,10 +16,10 @@ public interface PhotoDao {
     LiveData<Photo> getPhoto(String path);
 
     @Insert
-    void insert(Photo photo);
+    void insertPhoto(Photo photo);
 
     @Update
-    void update(Photo photo);
+    void updatePhoto(Photo photo);
 
     @Query("SELECT * FROM Photo ORDER BY im_timestamp DESC")
     LiveData<List<Photo>> getAllPhotos();

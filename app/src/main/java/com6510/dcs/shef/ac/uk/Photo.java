@@ -69,4 +69,3 @@ public class Photo {
         this.imTimestamp = imTimestamp;
     }
 }
-

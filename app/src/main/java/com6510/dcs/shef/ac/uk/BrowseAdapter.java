@@ -20,8 +20,8 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
     private Context context;
     private List<Photo> photos;
 
-    public BrowseAdapter(List<Photo> photos) {
-        this.photos = photos;
+    public BrowseAdapter(Context context) {
+        this.context = context;
     }
 
     public BrowseAdapter(Context context, List<Photo> photos) {
@@ -87,8 +87,10 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
             int position = holderAndPosition.position;
             BrowseAdapter.View_Holder holder = holderAndPosition.holder;
             File file = new File(photos.get(position).getImPath()); /* read photo from disk */
-            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-            return bitmap;
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.outHeight = 150;
+            options.outWidth = 150;
+            return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
         }
 
         @Override

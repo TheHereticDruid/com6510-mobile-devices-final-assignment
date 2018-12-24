@@ -24,7 +24,7 @@ public class GalleryViewModel extends AndroidViewModel {
     }
 
     void insert(Photo photo) {
-        repository.insert(photo);
+        repository.insertPhoto(photo);
     }
 
     /*
