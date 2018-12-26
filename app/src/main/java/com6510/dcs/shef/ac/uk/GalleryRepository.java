@@ -2,8 +2,10 @@ package com6510.dcs.shef.ac.uk;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 
 import java.util.List;
 
@@ -15,17 +17,16 @@ public class GalleryRepository extends ViewModel {
     public GalleryRepository(Application application) {
         db = PhotoRoomDatabase.getDatabase(application);
         dbDao = db.photoDao();
-        photos = dbDao.getAllPhotos(); /* fetch all photos from db */
-        int num_photos = 0;
-        if (photos.getValue() != null) {
-            num_photos = photos.getValue().size();
-        } else {
-            System.out.println("photos.getValue is null");
-        }
-        System.out.println("Got " + num_photos + " from db");
+
+        /* fetch all photos from db */
+        photos = dbDao.getAllPhotos();
+
+
+
+        /* this is the order in which data is shown */
     }
 
-    /* DB wrappers */
+    /* ------------ DB wrappers ------------- */
 
     public Photo getPhoto(String path) {
         Photo photo = new Photo(path);
@@ -37,11 +38,19 @@ public class GalleryRepository extends ViewModel {
         new InsertAsyncTask(dbDao).execute(photo);
     }
 
+    public void deletePhoto(String path) {
+        new DeleteAsyncTask(dbDao).execute(path);
+    }
+
     public LiveData<List<Photo>> getAllPhotos() {
         return photos;
     }
 
-    /* Async implementations */
+    public void deleteAll() {
+        new DeleteAllAsyncTask(dbDao).execute();
+    }
+
+    /* --------- Async DB implementations -----------*/
 
     private static class GetAsyncTask extends AsyncTask<Photo, Void, LiveData<Photo>> {
         private PhotoDao mAsyncTaskDao;
@@ -71,16 +80,31 @@ public class GalleryRepository extends ViewModel {
         }
     }
 
-    private static class GetAllAsyncTask extends AsyncTask<Void, Void, LiveData<List<Photo>>> {
+    private static class DeleteAsyncTask extends AsyncTask<String, Void, Void> {
         private PhotoDao mAsyncTaskDao;
 
-        GetAllAsyncTask(PhotoDao dao) {
+        DeleteAsyncTask(PhotoDao dao) {
             mAsyncTaskDao = dao;
         }
 
         @Override
-        protected LiveData<List<Photo>> doInBackground(final Void... params) {
-            return mAsyncTaskDao.getAllPhotos();
+        protected Void doInBackground(final String... params) {
+            mAsyncTaskDao.deletePhoto(params[0]);
+            return null;
+        }
+    }
+
+    private static class DeleteAllAsyncTask extends AsyncTask<Void, Void, Void> {
+        private PhotoDao mAsyncTaskDao;
+
+        DeleteAllAsyncTask(PhotoDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+            mAsyncTaskDao.deleteAllPhotos();
+            return null;
         }
     }
 }

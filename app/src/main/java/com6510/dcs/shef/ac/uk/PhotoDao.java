@@ -21,7 +21,10 @@ public interface PhotoDao {
     @Update
     void updatePhoto(Photo photo);
 
-    @Query("SELECT * FROM Photo ORDER BY im_timestamp DESC")
+    @Query("DELETE FROM Photo WHERE im_path LIKE :path")
+    void deletePhoto(String path);
+
+    @Query("SELECT * FROM Photo ORDER BY im_timestamp ASC")
     LiveData<List<Photo>> getAllPhotos();
 
     @Insert
@@ -29,4 +32,7 @@ public interface PhotoDao {
 
     @Update
     void updateAllPhotos(List<Photo> photos);
+
+    @Query("DELETE FROM Photo")
+    void deleteAllPhotos();
 }

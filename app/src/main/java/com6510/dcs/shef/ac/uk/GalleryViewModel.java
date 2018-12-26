@@ -3,7 +3,6 @@ package com6510.dcs.shef.ac.uk;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
 
 import java.util.List;
 
@@ -19,17 +18,23 @@ public class GalleryViewModel extends AndroidViewModel {
         photos = repository.getAllPhotos();
     }
 
+    public GalleryRepository getRepository() {
+        return repository;
+    }
+
     LiveData<List<Photo>> getAllPhotos() {
         return photos;
     }
 
-    void insert(Photo photo) {
+    void insertPhoto(Photo photo) {
         repository.insertPhoto(photo);
     }
 
-    /*
-    public void scan() {
-        repository.scan();
+    void deletePhoto(String path) {
+        repository.deletePhoto(path);
     }
-    */
+
+    void deleteAll() {
+        repository.deleteAll();
+    }
 }

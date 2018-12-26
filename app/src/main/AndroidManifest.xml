@@ -20,7 +20,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com6510.dcs.shef.ac.uk.ShowImageActivity"
+            android:name="com6510.dcs.shef.ac.uk.ShowPhotoActivity"
             android:label="@string/title_activity_show_image"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

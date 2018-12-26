@@ -43,8 +43,15 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
     public void onBindViewHolder(final View_Holder holder, final int position) {
         /* Use the provided View Holder on the onCreateViewHolder method to populate the
            current row on the RecyclerView */
-        if (holder != null && photos.get(position) != null) {
-            new LoadSinglePhotoTask().execute(new HolderAndPosition(position, holder)); /* load photo asynchronously */
+        Photo photo = photos.get(position);
+        if (holder != null && photo != null) {
+            if (photo.getImThumbnail() != null) {
+                /* thumbnail already cached */
+                holder.photoView.setImageBitmap(photo.getImThumbnail());
+            } else {
+                /* load photo from disk asynchronously */
+                new LoadSinglePhotoTask().execute(new HolderAndPosition(position, holder));
+            }
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -84,13 +91,11 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
         @Override
         protected Bitmap doInBackground(HolderAndPosition... holderAndPositions) {
             holderAndPosition = holderAndPositions[0];
-            int position = holderAndPosition.position;
-            BrowseAdapter.View_Holder holder = holderAndPosition.holder;
-            File file = new File(photos.get(position).getImPath()); /* read photo from disk */
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.outHeight = 150;
-            options.outWidth = 150;
-            return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+            Photo photo = photos.get(holderAndPosition.position);
+            Bitmap bitmap = BitmapFactory.decodeFile(photo.getImPath()); /* read photo from disk */
+            Bitmap small_bitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, true);
+            photo.setImThumbnail(small_bitmap);
+            return small_bitmap;
         }
 
         @Override

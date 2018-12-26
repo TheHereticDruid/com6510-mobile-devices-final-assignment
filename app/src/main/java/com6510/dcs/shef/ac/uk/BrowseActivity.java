@@ -11,6 +11,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -24,10 +27,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
@@ -36,8 +45,7 @@ import pl.aprilapps.easyphotopicker.EasyImage;
 
 public class BrowseActivity extends AppCompatActivity {
     
-    /* MVVM stuff */
-    LiveData<List<Photo>> photos;
+    /* ViewModel */
     private GalleryViewModel viewModel;
 
     private RecyclerView recycler_view;
@@ -49,6 +57,8 @@ public class BrowseActivity extends AppCompatActivity {
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 2987;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 7829;
 
+    private boolean scan_started = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,17 +69,25 @@ public class BrowseActivity extends AppCompatActivity {
         viewModel.getAllPhotos().observe(this, new Observer<List<Photo>>(){
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {
+                System.out.println("onChanged: size " + photos.size());
                 adapter.setPhotos(photos); /* update photos in the adapter */
+                if (scan_started == false) {
+                    /* update photo db asynchronously */
+                    System.out.println("Starting scan async task");
+                    new ScanAsyncTask(viewModel, getApplicationContext()).execute(photos);
+                    scan_started = true;
+                }
             }});
 
         /* set up grid */
         recycler_view = (RecyclerView) findViewById(R.id.grid_recycler_view);
         int numberOfColumns = 4;
         recycler_view.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
+        //recycler_view.setHasFixedSize(true);
 
         /* set recycle view adapter */
-
         adapter = new BrowseAdapter(this);
+        //adapter.setHasStableIds(true);
         recycler_view.setAdapter(adapter);
 
         /* floating button to manually add photos from gallery */
@@ -104,10 +122,6 @@ public class BrowseActivity extends AppCompatActivity {
 
         /* initialize easyimage */
         initEasyImage();
-
-        /* tell model to load photos */
-        System.out.println("Running scan");
-        //viewModel.scan();
     }
 
     @Override
@@ -145,13 +159,9 @@ public class BrowseActivity extends AppCompatActivity {
 
             @Override
             public void onImagesPicked(List<File> imageFiles, EasyImage.ImageSource source, int type) {
-/*
                 for (File f : imageFiles) {
-                    photos.add(new Photo(f));
+                    viewModel.insertPhoto(new Photo(f.getAbsolutePath()));
                 }
-                adapter.notifyDataSetChanged();
-                recycler_view.scrollToPosition(imageFiles.size() - 1);
-*/
             }
 
             @Override
@@ -162,6 +172,118 @@ public class BrowseActivity extends AppCompatActivity {
 
     public Activity getActivity() {
         return this;
+    }
+
+    private static class ScanAsyncTask extends AsyncTask<List<Photo>, Void, Void> {
+        GalleryViewModel vm;
+        private Context context;
+
+        ScanAsyncTask(GalleryViewModel vm, Context context) {
+            this.vm = vm;
+            this.context = context;
+        }
+
+        void indexFile(String path) {
+            System.out.println("Putting into db: " + path);
+            File sourceFile = new File(path);
+            /* create thumbnail dir */
+            File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
+            thumbnailDir.mkdir();
+            /* generate thumbnail */
+            Bitmap original_bitmap = BitmapFactory.decodeFile(path); /* read photo from disk */
+            Bitmap thumbnail_bitmap = Bitmap.createScaledBitmap(original_bitmap, 100, 100, true);
+            File thumbnail_file = new File(thumbnailDir, sourceFile.getName() + "-" + sourceFile.lastModified());
+            try (FileOutputStream out = new FileOutputStream(thumbnail_file.getAbsolutePath())) {
+                thumbnail_bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            /* create Photo object to insert in db */
+            Photo photo = new Photo(path);
+            photo.setImThumbPath(thumbnail_file.getAbsolutePath());
+            photo.setImTimestamp(sourceFile.lastModified());
+            photo.setImGps("");
+            photo.setImTitle("");
+
+            /* delete from db  */
+            vm.deletePhoto(path);
+
+            /* insert in db */
+            vm.insertPhoto(photo);
+        }
+
+        @Override
+        protected Void doInBackground(final List<Photo>... params) {
+            /* current db photos */
+            List<Photo> db_photos = params[0];
+            Map<String, Photo> db_photos_map = new HashMap<String, Photo>();
+            for (Photo p: db_photos) {
+                db_photos_map.put(p.getImPath(), p);
+            }
+            System.out.println("Found " + db_photos_map.size() + " photos in db.");
+
+            /* find all photos using mediastore */
+            String[] projection = {MediaStore.Images.Media.DATA};
+            Cursor cursor = MediaStore.Images.Media.query(context.getContentResolver(),
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    projection);
+            System.out.println("Indexing " + cursor.getCount() + " photos on phone.");
+            Set<String> indexFiles = new HashSet<String>();
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                String path = cursor.getString(cursor.getColumnIndex("_data"));
+                indexFiles.add(path);
+                System.out.println("Indexing: " + path);
+                cursor.moveToNext();
+            }
+
+            /* delete photos from db that do not exist anymore */
+            for (Photo photo : db_photos) {
+                if (indexFiles.contains(photo.getImPath()) == false) {
+                    /* delete this photo from db */
+                    System.out.println("Db entry does not exist anymore, deleting: " + photo.getImPath());
+                    vm.deletePhoto(photo.getImPath());
+                }
+            }
+
+            /* delete stale thumbnails */
+            File thumbnailDirectory = new File(context.getCacheDir(), "thumbnails");
+            Map<String, Photo> thumb_photos_map = new HashMap<String, Photo>();
+            for (Photo p: db_photos) {
+                thumb_photos_map.put(p.getImThumbPath(), p);
+            }
+            for (File f : thumbnailDirectory.listFiles()) {
+                if (!thumb_photos_map.containsKey(f.getAbsolutePath())) {
+                    f.delete();
+                }
+            }
+
+            /* update db */
+            for (String path : indexFiles) {
+                /* photo already exists in db */
+                if (db_photos_map.containsKey(path)) {
+                    System.out.println("Photo already exists in db: " + path);
+                    long db_ts = db_photos_map.get(path).getImTimestamp();
+                    long ix_ts = new File(path).lastModified();
+                    /* check modified timestamp in db is old */
+                    if (db_ts < ix_ts) {
+                        System.out.println("Db entry old, needs updating: " + path);
+                        /* need to update photo in db */
+                        indexFile(path);
+                    }
+                } else {
+                    indexFile(path);
+                }
+            }
+
+            /* debug */
+            System.out.println("Thumbnail dir: " + thumbnailDirectory.getAbsolutePath());
+            for (File f : thumbnailDirectory.listFiles()) {
+                System.out.println(f.getAbsolutePath());
+            }
+
+            return null;
+        }
     }
 
     /**
@@ -220,5 +342,4 @@ public class BrowseActivity extends AppCompatActivity {
             }
         }
     }
-
 }

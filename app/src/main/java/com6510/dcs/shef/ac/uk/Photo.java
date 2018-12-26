@@ -2,8 +2,10 @@ package com6510.dcs.shef.ac.uk;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 
 @Entity(indices = {@Index(value = {"im_path"}, unique = true)})
@@ -23,7 +25,10 @@ public class Photo {
     private String imGps;
 
     @ColumnInfo(name = "im_timestamp")
-    private int imTimestamp;
+    private long imTimestamp;
+
+    @Ignore
+    private Bitmap imThumbnail;
 
     public Photo(String imPath) {
         this.imPath = imPath;
@@ -61,11 +66,19 @@ public class Photo {
         this.imGps = imGps;
     }
 
-    public int getImTimestamp() {
+    public long getImTimestamp() {
         return imTimestamp;
     }
 
-    public void setImTimestamp(int imTimestamp) {
+    public void setImTimestamp(long imTimestamp) {
         this.imTimestamp = imTimestamp;
+    }
+
+    public Bitmap getImThumbnail() {
+        return imThumbnail;
+    }
+
+    public void setImThumbnail(Bitmap imThumbnail) {
+        this.imThumbnail = imThumbnail;
     }
 }
