@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Gallery</string>
     <string name="title_activity_show_image">ShowImageActivity</string>
+    <string name="clear_cache">Clear cache</string>
 </resources>

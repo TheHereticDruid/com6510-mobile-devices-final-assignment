@@ -24,6 +24,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -139,14 +141,6 @@ public class BrowseActivity extends AppCompatActivity {
         System.out.println("grantedPermissions: " + grantedPermissions.toString());
     }
 
-    private void initEasyImage() {
-        EasyImage.configuration(this)
-                .setImagesFolderName("EasyImage sample")
-                .setCopyTakenPhotosToPublicGalleryAppFolder(true)
-                .setCopyPickedImagesToPublicGalleryAppFolder(false)
-                .setAllowMultiplePickInGallery(true);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -173,6 +167,25 @@ public class BrowseActivity extends AppCompatActivity {
 
     public Activity getActivity() {
         return this;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.clear_cache) {
+            viewModel.deleteAll();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     void indexFile(String path) {
@@ -342,5 +355,13 @@ public class BrowseActivity extends AppCompatActivity {
                 grantedPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
             }
         }
+    }
+
+    private void initEasyImage() {
+        EasyImage.configuration(this)
+                .setImagesFolderName("EasyImage sample")
+                .setCopyTakenPhotosToPublicGalleryAppFolder(true)
+                .setCopyPickedImagesToPublicGalleryAppFolder(false)
+                .setAllowMultiplePickInGallery(true);
     }
 }
