@@ -22,6 +22,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +51,7 @@ public class BrowseActivity extends AppCompatActivity {
     
     /* ViewModel */
     private GalleryViewModel viewModel;
+    private LiveData<List<Photo>> photos;
 
     private RecyclerView recycler_view;
     private BrowseAdapter adapter;
@@ -68,10 +71,12 @@ public class BrowseActivity extends AppCompatActivity {
 
         /* set up live data */
         viewModel = ViewModelProviders.of(this).get(GalleryViewModel.class);
-        viewModel.getAllPhotos().observe(this, new Observer<List<Photo>>(){
+        photos = viewModel.getAllPhotos();
+        photos.observe(this, new Observer<List<Photo>>(){
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {
                 System.out.println("onChanged: size " + photos.size());
+                //setAdapterList(oldPhotos, photos);
                 adapter.setPhotos(photos); /* update photos in the adapter */
                 if (scan_started == false) {
                     /* update photo db asynchronously */
@@ -182,6 +187,9 @@ public class BrowseActivity extends AppCompatActivity {
 
         if (id == R.id.clear_cache) {
             viewModel.deleteAll();
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
             return true;
         }
 
@@ -194,6 +202,7 @@ public class BrowseActivity extends AppCompatActivity {
         /* create thumbnail dir */
         File thumbnailDir = new File(getApplicationContext().getCacheDir(), "thumbnails");
         thumbnailDir.mkdir();
+
         /* generate thumbnail */
         Bitmap original_bitmap = BitmapFactory.decodeFile(path); /* read photo from disk */
         Bitmap thumbnail_bitmap = Bitmap.createScaledBitmap(original_bitmap, 100, 100, true);
@@ -293,11 +302,52 @@ public class BrowseActivity extends AppCompatActivity {
             /* debug */
             System.out.println("Thumbnail dir: " + thumbnailDirectory.getAbsolutePath());
             for (File f : thumbnailDirectory.listFiles()) {
-                System.out.println(f.getAbsolutePath());
+                //System.out.println(f.getAbsolutePath());
             }
 
             return null;
         }
+    }
+
+    private class MyDiffCallback extends DiffUtil.Callback {
+        List<Photo> oldList;
+        List<Photo> newList;
+
+        public MyDiffCallback(List<Photo> newList, List<Photo> oldList) {
+            this.newList = newList;
+            this.oldList = oldList;
+        }
+
+        @Override
+        public int getOldListSize() {
+            return oldList.size();
+        }
+
+        @Override
+        public int getNewListSize() {
+            return newList.size();
+        }
+
+        @Override
+        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+            return oldList.get(oldItemPosition).getImPath().equals(newList.get(newItemPosition).getImPath());
+        }
+
+        @Override
+        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+            return oldList.get(oldItemPosition).equals(newList.get(newItemPosition));
+        }
+
+        @Nullable
+        @Override
+        public Object getChangePayload(int oldItemPosition, int newItemPosition) {
+            return super.getChangePayload(oldItemPosition, newItemPosition);
+        }
+    }
+
+    public void setAdapterList(List<Photo> oldPhotos, List<Photo> newPhotos) {
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new MyDiffCallback(this.photos.getValue(), newPhotos));
+        result.dispatchUpdatesTo(adapter);
     }
 
     /**
