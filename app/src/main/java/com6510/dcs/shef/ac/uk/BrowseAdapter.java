@@ -92,10 +92,9 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
         protected Bitmap doInBackground(HolderAndPosition... holderAndPositions) {
             holderAndPosition = holderAndPositions[0];
             Photo photo = photos.get(holderAndPosition.position);
-            Bitmap bitmap = BitmapFactory.decodeFile(photo.getImPath()); /* read photo from disk */
-            Bitmap small_bitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, true);
-            photo.setImThumbnail(small_bitmap);
-            return small_bitmap;
+            Bitmap bitmap = BitmapFactory.decodeFile(photo.getImThumbPath()); /* read photo from disk */
+            photo.setImThumbnail(bitmap);
+            return bitmap;
         }
 
         @Override

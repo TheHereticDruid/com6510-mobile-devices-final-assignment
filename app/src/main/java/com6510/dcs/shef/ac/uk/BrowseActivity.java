@@ -160,7 +160,8 @@ public class BrowseActivity extends AppCompatActivity {
             @Override
             public void onImagesPicked(List<File> imageFiles, EasyImage.ImageSource source, int type) {
                 for (File f : imageFiles) {
-                    viewModel.insertPhoto(new Photo(f.getAbsolutePath()));
+                    indexFile(f.getAbsolutePath());
+                    //viewModel.insertPhoto(new Photo(f.getAbsolutePath()));
                 }
             }
 
@@ -174,42 +175,42 @@ public class BrowseActivity extends AppCompatActivity {
         return this;
     }
 
-    private static class ScanAsyncTask extends AsyncTask<List<Photo>, Void, Void> {
+    void indexFile(String path) {
+        System.out.println("Putting into db: " + path);
+        File sourceFile = new File(path);
+        /* create thumbnail dir */
+        File thumbnailDir = new File(getApplicationContext().getCacheDir(), "thumbnails");
+        thumbnailDir.mkdir();
+        /* generate thumbnail */
+        Bitmap original_bitmap = BitmapFactory.decodeFile(path); /* read photo from disk */
+        Bitmap thumbnail_bitmap = Bitmap.createScaledBitmap(original_bitmap, 100, 100, true);
+        File thumbnail_file = new File(thumbnailDir, sourceFile.getName() + "-" + sourceFile.lastModified());
+        try (FileOutputStream out = new FileOutputStream(thumbnail_file.getAbsolutePath())) {
+            thumbnail_bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        /* create Photo object to insert in db */
+        Photo photo = new Photo(path);
+        photo.setImThumbPath(thumbnail_file.getAbsolutePath());
+        photo.setImTimestamp(sourceFile.lastModified());
+        photo.setImGps("");
+        photo.setImTitle("");
+
+        /* delete from db  */
+        viewModel.deletePhoto(path);
+
+        /* insert in db */
+        viewModel.insertPhoto(photo);
+    }
+
+    private class ScanAsyncTask extends AsyncTask<List<Photo>, Void, Void> {
         GalleryViewModel vm;
         private Context context;
 
         ScanAsyncTask(GalleryViewModel vm, Context context) {
             this.vm = vm;
             this.context = context;
-        }
-
-        void indexFile(String path) {
-            System.out.println("Putting into db: " + path);
-            File sourceFile = new File(path);
-            /* create thumbnail dir */
-            File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
-            thumbnailDir.mkdir();
-            /* generate thumbnail */
-            Bitmap original_bitmap = BitmapFactory.decodeFile(path); /* read photo from disk */
-            Bitmap thumbnail_bitmap = Bitmap.createScaledBitmap(original_bitmap, 100, 100, true);
-            File thumbnail_file = new File(thumbnailDir, sourceFile.getName() + "-" + sourceFile.lastModified());
-            try (FileOutputStream out = new FileOutputStream(thumbnail_file.getAbsolutePath())) {
-                thumbnail_bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            /* create Photo object to insert in db */
-            Photo photo = new Photo(path);
-            photo.setImThumbPath(thumbnail_file.getAbsolutePath());
-            photo.setImTimestamp(sourceFile.lastModified());
-            photo.setImGps("");
-            photo.setImTitle("");
-
-            /* delete from db  */
-            vm.deletePhoto(path);
-
-            /* insert in db */
-            vm.insertPhoto(photo);
         }
 
         @Override
