@@ -24,7 +24,7 @@ public interface PhotoDao {
     @Query("DELETE FROM Photo WHERE im_path LIKE :path")
     void deletePhoto(String path);
 
-    @Query("SELECT * FROM Photo ORDER BY im_timestamp ASC")
+    @Query("SELECT * FROM Photo ORDER BY im_timestamp DESC")
     LiveData<List<Photo>> getAllPhotos();
 
     @Insert

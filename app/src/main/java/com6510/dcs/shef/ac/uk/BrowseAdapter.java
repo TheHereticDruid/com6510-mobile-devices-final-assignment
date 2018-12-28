@@ -56,7 +56,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(context, ShowPhotoActivity.class);
-                    intent.putExtra("position", position);
+                    intent.putExtra("photo", photos.get(position));
                     context.startActivity(intent);
                 }
             });

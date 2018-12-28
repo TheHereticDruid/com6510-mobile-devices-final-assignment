@@ -6,10 +6,12 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 @Entity(indices = {@Index(value = {"im_path"}, unique = true)})
-public class Photo {
+public class Photo implements Parcelable {
     @PrimaryKey
     @NonNull
     @ColumnInfo(name = "im_path")
@@ -30,10 +32,20 @@ public class Photo {
     @Ignore
     private Bitmap imThumbnail;
 
+    /* ------------ constructors -------------- */
     public Photo(String imPath) {
         this.imPath = imPath;
     }
 
+    public Photo(Parcel in) {
+        this.imPath = in.readString();
+        this.imThumbPath = in.readString();
+        this.imTitle = in.readString();
+        this.imGps = in.readString();
+        this.imTimestamp = in.readLong();
+    }
+
+    /* ------------ getters and setters ---------------*/
     public String getImPath() {
         return imPath;
     }
@@ -80,5 +92,30 @@ public class Photo {
 
     public void setImThumbnail(Bitmap imThumbnail) {
         this.imThumbnail = imThumbnail;
+    }
+
+    /* parcels */
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.imPath);
+        dest.writeString(this.imThumbPath);
+        dest.writeString(this.imTitle);
+        dest.writeString(this.imGps);
+        dest.writeLong(this.imTimestamp);
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public Photo createFromParcel(Parcel in) {
+            return new Photo(in);
+        }
+
+        public Photo[] newArray(int size) {
+            return new Photo[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 }
