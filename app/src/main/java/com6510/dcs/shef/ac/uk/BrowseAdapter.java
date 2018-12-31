@@ -11,56 +11,60 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import java.io.File;
 import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
-public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holder> {
+public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewHolder> {
+
+    class ImageViewHolder extends RecyclerView.ViewHolder  {
+        private final ImageView photoItemView;
+
+        private ImageViewHolder(View itemView) {
+            super(itemView);
+            photoItemView = itemView.findViewById(R.id.photo_item);
+        }
+    }
+
+    private LayoutInflater mInflator;
     private Context context;
     private List<Photo> photos;
 
     public BrowseAdapter(Context context) {
         this.context = context;
-    }
-
-    public BrowseAdapter(Context context, List<Photo> photos) {
-        super();
-        this.photos = photos;
-        this.context = context;
+        mInflator = LayoutInflater.from(context);
     }
 
     @Override
-    public View_Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ImageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         //Inflate the layout, initialize the View Holder
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.browse_item,
-                parent, false);
-        context = parent.getContext();
-        return new View_Holder(v);
+        View v = mInflator.inflate(R.layout.browse_item, parent, false);
+        return new ImageViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(final View_Holder holder, final int position) {
+    public void onBindViewHolder(final ImageViewHolder holder, final int position) {
         /* Use the provided View Holder on the onCreateViewHolder method to populate the
            current row on the RecyclerView */
         Photo photo = photos.get(position);
-        if (holder != null && photo != null) {
-            if (photo.getImThumbnail() != null) {
-                /* thumbnail already cached */
-                holder.photoView.setImageBitmap(photo.getImThumbnail());
-            } else {
-                /* load photo from disk asynchronously */
-                new LoadSinglePhotoTask().execute(new HolderAndPosition(position, holder));
-            }
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(context, ShowPhotoActivity.class);
-                    intent.putExtra("photo", photos.get(position));
-                    context.startActivity(intent);
-                }
-            });
+        if (photo.getImThumbnail() != null) {
+            /* thumbnail already cached */
+            holder.photoItemView.setImageBitmap(photo.getImThumbnail());
+        } else {
+            /* load photo from disk asynchronously */
+            //new LoadSinglePhotoTask().execute(new HolderAndPosition(position, holder));
+            Bitmap bitmap = BitmapFactory.decodeFile(photo.getImThumbPath()); /* read photo from disk */
+            photo.setImThumbnail(bitmap);
+            holder.photoItemView.setImageBitmap(bitmap); /* set photo to grid element */
         }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ShowPhotoActivity.class);
+                intent.putExtra("photo", photos.get(position));
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -74,15 +78,6 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
     public void setPhotos(List<Photo> photos) {
         this.photos = photos;
         notifyDataSetChanged();
-    }
-
-    public class View_Holder extends RecyclerView.ViewHolder  {
-        ImageView photoView;
-
-        View_Holder(View itemView) {
-            super(itemView);
-            photoView = (ImageView) itemView.findViewById(R.id.photo_item);
-        }
     }
 
     private class LoadSinglePhotoTask extends AsyncTask<HolderAndPosition, Void, Bitmap> {
@@ -99,15 +94,15 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.View_Holde
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            holderAndPosition.holder.photoView.setImageBitmap(bitmap); /* set photo to grid element */
+            holderAndPosition.holder.photoItemView.setImageBitmap(bitmap); /* set photo to grid element */
         }
     }
 
     private class HolderAndPosition {
         int position;
-        BrowseAdapter.View_Holder holder;
+        BrowseAdapter.ImageViewHolder holder;
 
-        public HolderAndPosition(int position, BrowseAdapter.View_Holder holder) {
+        public HolderAndPosition(int position, BrowseAdapter.ImageViewHolder holder) {
             this.position = position;
             this.holder = holder;
         }

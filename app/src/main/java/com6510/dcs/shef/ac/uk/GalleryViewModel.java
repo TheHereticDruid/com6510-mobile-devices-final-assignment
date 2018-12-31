@@ -3,6 +3,7 @@ package com6510.dcs.shef.ac.uk;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.content.Context;
 
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class GalleryViewModel extends AndroidViewModel {
         return photos;
     }
 
+    List<Photo> getAllPhotosSync() { return repository.getAllPhotosSync(); }
+
     void insertPhoto(Photo photo) {
         repository.insertPhoto(photo);
     }
@@ -36,5 +39,9 @@ public class GalleryViewModel extends AndroidViewModel {
 
     void deleteAll() {
         repository.deleteAll();
+    }
+
+    void refreshDatabase(Context context) {
+        repository.refreshDatabase(context);
     }
 }
