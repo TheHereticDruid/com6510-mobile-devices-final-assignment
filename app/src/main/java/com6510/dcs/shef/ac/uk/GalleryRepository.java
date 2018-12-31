@@ -13,6 +13,9 @@ import android.provider.MediaStore;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -122,13 +125,12 @@ public class GalleryRepository extends ViewModel {
         }
     }
 
-    public static void indexFile(PhotoRoomDatabase db, String path, String thumbnailDir) {
+    public static void indexFile(PhotoRoomDatabase db, File sourceFile, String thumbnailDir) {
         PhotoDao dao = db.photoDao();
-        System.out.println("Putting into db: " + path);
-        File sourceFile = new File(path);
+        System.out.println("Putting into db: " + sourceFile.getAbsolutePath());
 
         /* generate thumbnail */
-        Bitmap original_bitmap = BitmapFactory.decodeFile(path); /* read photo from disk */
+        Bitmap original_bitmap = BitmapFactory.decodeFile(sourceFile.getAbsolutePath()); /* read photo from disk */
         Bitmap thumbnail_bitmap = Bitmap.createScaledBitmap(original_bitmap, 100, 100, true);
         File thumbnail_file = new File(thumbnailDir, sourceFile.getName() + "-" + sourceFile.lastModified());
         try (FileOutputStream out = new FileOutputStream(thumbnail_file.getAbsolutePath())) {
@@ -137,7 +139,7 @@ public class GalleryRepository extends ViewModel {
             e.printStackTrace();
         }
         /* create Photo object to insert in db */
-        Photo photo = new Photo(path);
+        Photo photo = new Photo(sourceFile.getAbsolutePath());
         photo.setImThumbPath(thumbnail_file.getAbsolutePath());
         photo.setImTimestamp(sourceFile.lastModified());
         photo.setImGps("");
@@ -177,18 +179,21 @@ public class GalleryRepository extends ViewModel {
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     projection);
             System.out.println("Indexing " + cursor.getCount() + " photos on phone.");
-            Set<String> filesToBeIndexed = new HashSet<String>();
+            List<File> filesToBeIndexed = new ArrayList<File>();
+            Set<String> pathsToBeIndexed = new HashSet<String>();
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 String path = cursor.getString(cursor.getColumnIndex("_data"));
-                filesToBeIndexed.add(new File(path).getAbsolutePath());
-                //System.out.println("Indexing: " + path);
+                File f = new File(path);
+                filesToBeIndexed.add(f);
+                pathsToBeIndexed.add(f.getAbsolutePath());
                 cursor.moveToNext();
+                //System.out.println("Indexing: " + path);
             }
 
             /* delete photos from db that do not exist anymore */
             for (Photo photo : db_photos) {
-                if (filesToBeIndexed.contains(photo.getImPath()) == false) {
+                if (pathsToBeIndexed.contains(photo.getImPath()) == false) {
                     /* delete this photo from db */
                     //System.out.println("Db entry does not exist anymore, deleting: " + photo.getImPath());
                     mDao.deletePhoto(photo.getImPath());
@@ -211,8 +216,17 @@ public class GalleryRepository extends ViewModel {
             File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
             thumbnailDir.mkdir();
 
+            /* sort files to be indexed by modified timestamp */
+            Collections.sort(filesToBeIndexed, new Comparator<File>() {
+                @Override
+                public int compare(File o1, File o2) {
+                    return (int)(o1.lastModified() - o2.lastModified());
+                }
+            });
+
             /* read files, create thumbnails and store in db */
-            for (String path : filesToBeIndexed) {
+            for (File file : filesToBeIndexed) {
+                String path = file.getAbsolutePath();
                 /* photo already exists in db */
                 if (db_photos_map.containsKey(path)) {
                     //System.out.println("Photo already exists in db: " + path);
@@ -222,10 +236,10 @@ public class GalleryRepository extends ViewModel {
                     if (db_ts < ix_ts) {
                         System.out.println("Db entry old, needs updating: " + path);
                         /* need to update photo in db */
-                        indexFile(db, path, thumbnailDir.getAbsolutePath());
+                        indexFile(db, file, thumbnailDir.getAbsolutePath());
                     }
                 } else {
-                    indexFile(db, path, thumbnailDir.getAbsolutePath());
+                    indexFile(db, file, thumbnailDir.getAbsolutePath());
                 }
             }
 

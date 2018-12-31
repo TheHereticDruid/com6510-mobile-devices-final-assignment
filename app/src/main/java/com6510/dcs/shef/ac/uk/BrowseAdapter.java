@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
@@ -28,7 +30,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
 
     private LayoutInflater mInflator;
     private Context context;
-    private List<Photo> photos;
+    private List<Photo> photos = new ArrayList<>();
 
     public BrowseAdapter(Context context) {
         this.context = context;
@@ -78,6 +80,14 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
     public void setPhotos(List<Photo> photos) {
         this.photos = photos;
         notifyDataSetChanged();
+    }
+
+    public void setPhotosDiff(List<Photo> photos) {
+        Util.MyDiffCallback diffCallback = new Util.MyDiffCallback(this.photos, photos);
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(diffCallback);
+        this.photos.clear();
+        this.photos.addAll(photos);
+        result.dispatchUpdatesTo(this);
     }
 
     private class LoadSinglePhotoTask extends AsyncTask<HolderAndPosition, Void, Bitmap> {

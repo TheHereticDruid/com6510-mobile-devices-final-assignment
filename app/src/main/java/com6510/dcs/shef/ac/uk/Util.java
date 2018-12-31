@@ -102,13 +102,13 @@ public class Util {
                 .setAllowMultiplePickInGallery(true);
     }
 
-    public class MyDiffCallback extends DiffUtil.Callback {
+    public static class MyDiffCallback extends DiffUtil.Callback {
         List<Photo> oldList;
         List<Photo> newList;
 
-        public MyDiffCallback(List<Photo> newList, List<Photo> oldList) {
-            this.newList = newList;
+        public MyDiffCallback(List<Photo> oldList, List<Photo> newList) {
             this.oldList = oldList;
+            this.newList = newList;
         }
 
         @Override
@@ -123,12 +123,17 @@ public class Util {
 
         @Override
         public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-            return oldList.get(oldItemPosition).getImPath().equals(newList.get(newItemPosition).getImPath());
+            String old_path = oldList.get(oldItemPosition).getImPath();
+            String new_path = newList.get(newItemPosition).getImPath();
+            boolean res = old_path.equals(new_path);
+            return res;
         }
 
         @Override
         public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-            return oldList.get(oldItemPosition).equals(newList.get(newItemPosition));
+            long old_ts = oldList.get(oldItemPosition).getImTimestamp();
+            long new_ts = newList.get(newItemPosition).getImTimestamp();
+            return old_ts == new_ts;
         }
 
         @Nullable

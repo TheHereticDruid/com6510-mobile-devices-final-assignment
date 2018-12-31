@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -16,6 +17,9 @@ import android.view.MenuItem;
 import android.view.View;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +39,8 @@ public class BrowseActivity extends AppCompatActivity {
     /* permissions */
     private Set<String> requestedPermissions;
     private Set<String> grantedPermissions;
+
+    List<Photo> oldPhotos = new ArrayList<Photo>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,8 +69,15 @@ public class BrowseActivity extends AppCompatActivity {
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {
                 System.out.println("onChanged: size " + photos.size());
-                //setAdapterList(oldPhotos, photos);
-                adapter.setPhotos(photos); /* update photos in the adapter */
+                Collections.sort(photos, (new Comparator<Photo>() {
+                    @Override
+                    public int compare(Photo o1, Photo o2) {
+                        return (int)(o1.getImTimestamp() - o2.getImTimestamp());
+                    }
+                }));
+                /* update photos in the adapter */
+                adapter.setPhotosDiff(photos);
+                //adapter.setPhotos(photos);
             }});
 
         /* floating button to manually add photos from gallery */
@@ -164,10 +177,5 @@ public class BrowseActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public void setAdapterList(List<Photo> oldPhotos, List<Photo> newPhotos) {
-        //DiffUtil.DiffResult result = DiffUtil.calculateDiff(new MyDiffCallback(this.photos.getValue(), newPhotos));
-        //result.dispatchUpdatesTo(adapter);
     }
 }
