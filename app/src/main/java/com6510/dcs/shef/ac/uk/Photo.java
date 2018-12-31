@@ -23,8 +23,11 @@ public class Photo implements Parcelable {
     @ColumnInfo(name = "im_title")
     private String imTitle;
 
-    @ColumnInfo(name = "im_gps")
-    private String imGps;
+    @ColumnInfo(name = "im_lat")
+    private int imLat;
+
+    @ColumnInfo(name = "im_lng")
+    private int imLng;
 
     @ColumnInfo(name = "im_timestamp")
     private long imTimestamp;
@@ -41,7 +44,9 @@ public class Photo implements Parcelable {
         this.imPath = in.readString();
         this.imThumbPath = in.readString();
         this.imTitle = in.readString();
-        this.imGps = in.readString();
+        this.imLat = in.readInt();
+
+        this.imLng = in.readInt();
         this.imTimestamp = in.readLong();
     }
 
@@ -70,14 +75,6 @@ public class Photo implements Parcelable {
         this.imTitle = imTitle;
     }
 
-    public String getImGps() {
-        return imGps;
-    }
-
-    public void setImGps(String imGps) {
-        this.imGps = imGps;
-    }
-
     public long getImTimestamp() {
         return imTimestamp;
     }
@@ -94,13 +91,31 @@ public class Photo implements Parcelable {
         this.imThumbnail = imThumbnail;
     }
 
+    public int getImLat() {
+        return imLat;
+    }
+
+    public void setImLat(int imLat) {
+        this.imLat = imLat;
+    }
+
+    public int getImLng() {
+        return imLng;
+    }
+
+    public void setImLng(int imLng) {
+        this.imLng = imLng;
+    }
+
+
     /* parcels */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.imPath);
         dest.writeString(this.imThumbPath);
         dest.writeString(this.imTitle);
-        dest.writeString(this.imGps);
+        dest.writeInt(this.imLat);
+        dest.writeInt(this.imLng);
         dest.writeLong(this.imTimestamp);
     }
 

@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,7 @@ public class BrowseActivity extends AppCompatActivity {
     
     /* ViewModel */
     private GalleryViewModel viewModel;
+    private ArrayList<Photo> photoDataset;
 
     private RecyclerView recycler_view;
     private BrowseAdapter adapter;
@@ -62,6 +64,7 @@ public class BrowseActivity extends AppCompatActivity {
         viewModel.getAllPhotos().observe(this, new Observer<List<Photo>>(){
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {
+                photoDataset=(ArrayList<Photo>) photos;
                 System.out.println("onChanged: size " + photos.size());
                 //setAdapterList(oldPhotos, photos);
                 adapter.setPhotos(photos); /* update photos in the adapter */
@@ -73,6 +76,16 @@ public class BrowseActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 EasyImage.openGallery(getActivity(), 0);
+            }
+        });
+
+        FloatingActionButton fabMap = (FloatingActionButton) findViewById(R.id.fab_map);
+        fabMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(v.getContext(), MapsActivity.class);
+                intent.putExtra("Photos", photoDataset);
+                startActivity(intent);
             }
         });
 

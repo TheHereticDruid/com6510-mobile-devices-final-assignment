@@ -2,4 +2,6 @@
     <string name="app_name">Gallery</string>
     <string name="title_activity_show_image">Preview</string>
     <string name="clear_cache">Clear cache</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="slide_show_image">Slide Show Image</string>
 </resources>

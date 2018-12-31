@@ -140,7 +140,8 @@ public class GalleryRepository extends ViewModel {
         Photo photo = new Photo(path);
         photo.setImThumbPath(thumbnail_file.getAbsolutePath());
         photo.setImTimestamp(sourceFile.lastModified());
-        photo.setImGps("");
+        photo.setImLat(0);
+        photo.setImLng(0);
         photo.setImTitle("");
 
         /* delete old copy from db */

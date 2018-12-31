@@ -23,6 +23,9 @@ public class Util {
 
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 2987;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 7829;
+    private static final int REQUEST_ACCESS_FINE_LOCATION = 1357;
+    private static final int REQUEST_INTERNET = 5731;
+    private static final int REQUEST_ACCESS_NETWORK_STATE = 3715;
 
     public static Set<String> getDeclaredPermissions(Context context) {
         try {
@@ -90,6 +93,72 @@ public class Util {
                 }
             } else {
                 grantedPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+            /* Check fine location permission */
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    android.support.v7.app.AlertDialog.Builder alertBuilder = new android.support.v7.app.AlertDialog.Builder(context);
+                    alertBuilder.setCancelable(true);
+                    alertBuilder.setTitle("Permission necessary");
+                    alertBuilder.setMessage("Accessing Fine Permission is necessary");
+                    alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_ACCESS_FINE_LOCATION);
+                        }
+                    });
+                    android.support.v7.app.AlertDialog alert = alertBuilder.create();
+                    alert.show();
+                } else {
+                    System.out.println("Requesting fine location permission");
+                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_ACCESS_FINE_LOCATION);
+                }
+            } else {
+                grantedPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            }
+            /* Check internet permission */
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.INTERNET)) {
+                    android.support.v7.app.AlertDialog.Builder alertBuilder = new android.support.v7.app.AlertDialog.Builder(context);
+                    alertBuilder.setCancelable(true);
+                    alertBuilder.setTitle("Permission necessary");
+                    alertBuilder.setMessage("Accessing Internet is necessary");
+                    alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.INTERNET}, REQUEST_INTERNET);
+                        }
+                    });
+                    android.support.v7.app.AlertDialog alert = alertBuilder.create();
+                    alert.show();
+                } else {
+                    System.out.println("Requesting fine location permission");
+                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.INTERNET}, REQUEST_INTERNET);
+                }
+            } else {
+                grantedPermissions.add(Manifest.permission.INTERNET);
+            }
+            /* Check network state permission */
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_NETWORK_STATE)) {
+                    android.support.v7.app.AlertDialog.Builder alertBuilder = new android.support.v7.app.AlertDialog.Builder(context);
+                    alertBuilder.setCancelable(true);
+                    alertBuilder.setTitle("Permission necessary");
+                    alertBuilder.setMessage("Accessing Network State is necessary");
+                    alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_NETWORK_STATE}, REQUEST_ACCESS_NETWORK_STATE);
+                        }
+                    });
+                    android.support.v7.app.AlertDialog alert = alertBuilder.create();
+                    alert.show();
+                } else {
+                    System.out.println("Requesting fine location permission");
+                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_NETWORK_STATE}, REQUEST_ACCESS_NETWORK_STATE);
+                }
+            } else {
+                grantedPermissions.add(Manifest.permission.ACCESS_NETWORK_STATE);
             }
         }
     }
