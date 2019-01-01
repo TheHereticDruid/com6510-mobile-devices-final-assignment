@@ -1,6 +1,8 @@
 package com6510.dcs.shef.ac.uk;
 
 import android.content.pm.PackageManager;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -8,12 +10,17 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -29,6 +36,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Photo> mDataset=new ArrayList<Photo>();
     private boolean mLocationPermissionGranted;
+
+    public class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
+
+        private final View markerInfoView;
+
+        public MarkerInfoAdapter(){
+            markerInfoView=getLayoutInflater().inflate(R.layout.marker_info_window, null);
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker){
+            return null;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker){
+            ImageView markerInfoThumbnail= ((ImageView)markerInfoView.findViewById(R.id.marker_info_thumbnail));
+            Drawable drawable=Drawable.createFromPath(marker.getSnippet());
+            markerInfoThumbnail.setImageBitmap(((BitmapDrawable)drawable).getBitmap());
+            TextView markerInfoTitle= ((TextView)markerInfoView.findViewById(R.id.marker_info_title));
+            markerInfoTitle.setText(marker.getTitle());
+            LatLng location=marker.getPosition();
+            TextView markerInfoLat= ((TextView)markerInfoView.findViewById(R.id.marker_info_lat));
+            markerInfoLat.setText(Double.toString(location.latitude));
+            TextView markerInfoLng= ((TextView)markerInfoView.findViewById(R.id.marker_info_lng));
+            markerInfoLng.setText(Double.toString(location.longitude));
+            return markerInfoView;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,12 +102,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a marker in Sydney and move the camera
         for(Photo location: mDataset) {
             LatLng coords = new LatLng(location.getImLat(), location.getImLng());
-            mMap.addMarker(new MarkerOptions().position(coords).title(location.getImTitle()));
+            mMap.addMarker(new MarkerOptions().position(coords).title(location.getImTitle()).icon(BitmapDescriptorFactory.fromPath(location.getImThumbPath())).snippet(location.getImThumbPath()));
         }
 //        if(mLocationPermissionGranted) {
 //            mMap.setMyLocationEnabled(true);
 //        }
         mMap.animateCamera( CameraUpdateFactory.zoomTo( 2.0f ) );
+        mMap.setInfoWindowAdapter(new MarkerInfoAdapter());
     }
 
     @Override
