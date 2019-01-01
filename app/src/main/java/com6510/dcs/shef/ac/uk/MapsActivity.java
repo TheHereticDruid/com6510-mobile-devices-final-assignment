@@ -1,6 +1,7 @@
 package com6510.dcs.shef.ac.uk;
 
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -57,6 +59,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             markerInfoThumbnail.setImageBitmap(((BitmapDrawable)drawable).getBitmap());
             TextView markerInfoTitle= ((TextView)markerInfoView.findViewById(R.id.marker_info_title));
             markerInfoTitle.setText(marker.getTitle());
+            markerInfoTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, markerInfoTitle.getTextSize()*1.5f);
+            markerInfoTitle.setTypeface(null, Typeface.BOLD);
             LatLng location=marker.getPosition();
             TextView markerInfoLat= ((TextView)markerInfoView.findViewById(R.id.marker_info_lat));
             markerInfoLat.setText(Double.toString(location.latitude));
