@@ -1,11 +1,15 @@
 package com6510.dcs.shef.ac.uk;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -21,10 +25,10 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
     // you provide access to all the views for a data item in a view holder
     public static class MapsViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        public TextView mTextView;
-        public MapsViewHolder(TextView v) {
-            super(v);
-            mTextView = v;
+        public ImageView mImageView;
+        public MapsViewHolder(ImageView imageView) {
+            super(imageView);
+            mImageView = imageView;
         }
     }
 
@@ -38,9 +42,8 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
     @Override
     public MapsAdapter.MapsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
-        TextView v = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_view, parent, false);
-        MapsViewHolder vh = new MapsViewHolder(v);
-        return vh;
+        ImageView view = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.thumbnail_view, parent, false);
+        return new MapsViewHolder(view);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -50,8 +53,8 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
         // - replace the contents of the view with that element
         final Context context = mContextWeakReference.get();
         final Photo photo=mDataset.get(position);
-        holder.mTextView.setText(photo.getImTitle());
-        holder.mTextView.setOnClickListener(new View.OnClickListener() {
+        holder.mImageView.setImageBitmap(BitmapFactory.decodeFile(photo.getImThumbPath()));
+        holder.mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((MapsActivity) context).thumbnailClick(photo);

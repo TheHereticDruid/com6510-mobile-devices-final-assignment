@@ -167,7 +167,7 @@ public class GalleryRepository extends ViewModel {
             /* current db photos */
             List<Photo> db_photos = mDao.getAllPhotosSync();
             Map<String, Photo> db_photos_map = new HashMap<String, Photo>();
-            for (Photo p: db_photos) {
+            for (Photo p : db_photos) {
                 db_photos_map.put(p.getImPath(), p);
             }
             System.out.println("Found " + db_photos_map.size() + " photos in db.");
@@ -199,12 +199,14 @@ public class GalleryRepository extends ViewModel {
             /* delete stale thumbnails */
             File thumbnailDirectory = new File(context.getCacheDir(), "thumbnails");
             Map<String, Photo> thumb_photos_map = new HashMap<String, Photo>();
-            for (Photo p: db_photos) {
+            for (Photo p : db_photos) {
                 thumb_photos_map.put(p.getImThumbPath(), p);
             }
-            for (File f : thumbnailDirectory.listFiles()) {
-                if (!thumb_photos_map.containsKey(f.getAbsolutePath())) {
-                    f.delete();
+            if (thumbnailDirectory.listFiles() != null){
+                for (File f : thumbnailDirectory.listFiles()) {
+                    if (!thumb_photos_map.containsKey(f.getAbsolutePath())) {
+                        f.delete();
+                    }
                 }
             }
 

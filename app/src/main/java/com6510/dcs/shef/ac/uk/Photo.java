@@ -45,7 +45,6 @@ public class Photo implements Parcelable {
         this.imThumbPath = in.readString();
         this.imTitle = in.readString();
         this.imLat = in.readInt();
-
         this.imLng = in.readInt();
         this.imTimestamp = in.readLong();
     }

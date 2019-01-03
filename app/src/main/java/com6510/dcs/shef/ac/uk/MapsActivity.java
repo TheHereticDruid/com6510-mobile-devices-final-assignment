@@ -101,17 +101,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(GoogleMap googleMap) throws SecurityException{
         mMap = googleMap;
-        // Add a marker in Sydney and move the camera
         for(Photo location: mDataset) {
             LatLng coords = new LatLng(location.getImLat(), location.getImLng());
             mMap.addMarker(new MarkerOptions().position(coords).title(location.getImTitle()).icon(BitmapDescriptorFactory.fromPath(location.getImThumbPath())).snippet(location.getImThumbPath()));
         }
-//        if(mLocationPermissionGranted) {
-//            mMap.setMyLocationEnabled(true);
-//        }
-        mMap.animateCamera( CameraUpdateFactory.zoomTo( 2.0f ) );
+        if(mLocationPermissionGranted) {
+            mMap.setMyLocationEnabled(true);
+        }
+        mMap.animateCamera( CameraUpdateFactory.zoomTo( 5.0f ) );
         mMap.setInfoWindowAdapter(new MarkerInfoAdapter());
     }
 
