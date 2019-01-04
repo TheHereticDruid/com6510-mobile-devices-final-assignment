@@ -63,9 +63,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             markerInfoTitle.setTypeface(null, Typeface.BOLD);
             LatLng location=marker.getPosition();
             TextView markerInfoLat= ((TextView)markerInfoView.findViewById(R.id.marker_info_lat));
-            markerInfoLat.setText(Double.toString(location.latitude));
+            markerInfoLat.setText("Latitude: "+Double.toString(location.latitude));
             TextView markerInfoLng= ((TextView)markerInfoView.findViewById(R.id.marker_info_lng));
-            markerInfoLng.setText(Double.toString(location.longitude));
+            markerInfoLng.setText("Longitude"+Double.toString(location.longitude));
             return markerInfoView;
         }
     }
