@@ -16,7 +16,6 @@
         android:layout_alignParentLeft="true"
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/ic_gallery_black_24dp"
-        app:backgroundTint="@android:color/holo_orange_light"
         app:fabSize="normal" />
 
     <android.support.design.widget.FloatingActionButton
@@ -29,12 +28,19 @@
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/ic_add_a_photo_black_24dp"
-        app:backgroundTint="@android:color/holo_orange_light"
         app:fabSize="normal" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/grid_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:text="@string/no_photos_available" />
 
 </RelativeLayout>

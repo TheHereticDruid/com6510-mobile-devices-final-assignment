@@ -1,5 +1,6 @@
 package com6510.dcs.shef.ac.uk;
 
+import android.app.Activity;
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
@@ -9,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -200,21 +202,20 @@ public class GalleryRepository extends ViewModel {
                 }
             }
 
-            /* delete stale thumbnails */
-            File thumbnailDirectory = new File(context.getCacheDir(), "thumbnails");
+            /* create thumbnail dir if not already created, delete stale thumbnails */
+            File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
+            thumbnailDir.mkdir();
+            System.out.println("Thumbnail dir: " + thumbnailDir.getAbsolutePath());
+
             Map<String, Photo> thumb_photos_map = new HashMap<String, Photo>();
             for (Photo p: db_photos) {
                 thumb_photos_map.put(p.getImThumbPath(), p);
             }
-            for (File f : thumbnailDirectory.listFiles()) {
+            for (File f : thumbnailDir.listFiles()) {
                 if (!thumb_photos_map.containsKey(f.getAbsolutePath())) {
                     f.delete();
                 }
             }
-
-            /* create thumbnail dir */
-            File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
-            thumbnailDir.mkdir();
 
             /* sort files to be indexed by modified timestamp */
             Collections.sort(filesToBeIndexed, new Comparator<File>() {
@@ -244,8 +245,7 @@ public class GalleryRepository extends ViewModel {
             }
 
             /* debug */
-            System.out.println("Thumbnail dir: " + thumbnailDirectory.getAbsolutePath());
-            for (File f : thumbnailDirectory.listFiles()) {
+            for (File f : thumbnailDir.listFiles()) {
                 //System.out.println(f.getAbsolutePath());
             }
 
