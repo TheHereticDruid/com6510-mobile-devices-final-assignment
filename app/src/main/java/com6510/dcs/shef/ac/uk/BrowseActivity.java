@@ -3,6 +3,7 @@ package com6510.dcs.shef.ac.uk;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
@@ -33,6 +34,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
@@ -50,7 +52,6 @@ public class BrowseActivity extends AppCompatActivity {
     /* permissions */
     private Set<String> neededPermissions;
     private Set<String> grantedPermissions;
-    private Set<String> askedPermissions;
     private final int REQUEST_READ_EXTERNAL_STORAGE = 2987;
     private final int REQUEST_WRITE_EXTERNAL_STORAGE = 7829;
 
@@ -65,67 +66,21 @@ public class BrowseActivity extends AppCompatActivity {
         activity = this;
         neededPermissions = Util.getDeclaredPermissions(getApplicationContext());
         grantedPermissions = new HashSet<>();
-        askedPermissions = new HashSet<>();
 
         /* request needed permissions */
         System.out.println("Needed permissions: " + neededPermissions.toString());
         System.out.println("Requesting permissions");
         requestPermissions();
-
-        /* we already had all permissions */
-        if (grantedPermissions.containsAll(neededPermissions)) {
-            setup();
-        }
     }
 
     void requestPermissions() {
-        int currentAPIVersion = Build.VERSION.SDK_INT;
-        if (currentAPIVersion >= android.os.Build.VERSION_CODES.M) {
-            /* Check read permission */
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-                    alertBuilder.setCancelable(true);
-                    alertBuilder.setTitle("Permission necessary");
-                    alertBuilder.setMessage("Reading external storage permission is necessary");
-                    alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE);
-                        }
-                    });
-                    AlertDialog alert = alertBuilder.create();
-                    alert.show();
-                } else {
-                    System.out.println("Requesting read permission");
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE);
-                }
-            } else {
-                grantedPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-            }
-            /* Check write permission */
-            if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-                    alertBuilder.setCancelable(true);
-                    alertBuilder.setTitle("Permission necessary");
-                    alertBuilder.setMessage("Writing external storage permission is necessary");
-                    alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-                        public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
-                        }
-                    });
-                    AlertDialog alert = alertBuilder.create();
-                    alert.show();
-                } else {
-                    System.out.println("Requesting write permission");
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE);
-                }
-            } else {
-                grantedPermissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            }
-        }
+        String[] permissions = {
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_FINE_LOCATION
+        };
+
+        ActivityCompat.requestPermissions(activity, permissions, 0);
     }
 
     @Override
@@ -134,26 +89,22 @@ public class BrowseActivity extends AppCompatActivity {
 
         /* update set of granted permissions */
         for (int i=0; i < permissions.length; i++) {
-            askedPermissions.add(permissions[i]);
             if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
                 grantedPermissions.add(permissions[i]);
             }
         }
         System.out.println("Granted permissions so far: " + grantedPermissions.toString());
-        System.out.println("Asked permissions so far: " + neededPermissions.toString());
 
         /* check if we have all needed permissions now */
         if (grantedPermissions.containsAll(neededPermissions)) {
             /* resume app if we have required permissions */
             System.out.println("Got all permissions, resuming app");
             setup();
-        } else if (askedPermissions.containsAll(neededPermissions)) {
-            /* done asking for permissions, didn't get all */
+        } else {
+            /* didn't get all permissions */
             System.out.println("Did not get all required permissions, exiting");
             Toast.makeText(getApplicationContext(), "Did not get all necessary permissions", Toast.LENGTH_LONG).show();
             this.finishAffinity();
-        } else {
-            System.out.println("Not done asking permissions yet");
         }
     }
 
@@ -240,8 +191,7 @@ public class BrowseActivity extends AppCompatActivity {
                 System.out.println("Inserting manually picked files:");
                 for (File f : imageFiles) {
                     System.out.println(f.getAbsolutePath());
-                    //indexFile(f.getAbsolutePath());
-                    viewModel.insertPhoto(new Photo(f.getAbsolutePath()));
+                    viewModel.insertPhoto(new Photo(f.getAbsolutePath(), Util.getNewThumbnailPath(getApplicationContext())));
                 }
             }
 
@@ -264,12 +214,8 @@ public class BrowseActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.clear_cache) {
-            viewModel.deleteAll();
-            viewModel.refreshDatabase(getApplicationContext());
-            Intent intent = getIntent();
-            finish();
-            startActivity(intent);
+        if (id == R.id.reset_app) {
+            ((ActivityManager)getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE)).clearApplicationUserData();
             return true;
         }
         return super.onOptionsItemSelected(item);
