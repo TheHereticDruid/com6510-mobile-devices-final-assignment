@@ -4,4 +4,7 @@
     <string name="clear_cache">Clear cache</string>
     <string name="title_activity_maps">Map</string>
     <string name="slide_show_image">Slide Show Image</string>
+    <string name="search_by_title">Search by Title</string>
+    <string name="reset_conditions">Submit an empty string to reset the filter</string>
+    <string name="search_button">Search</string>
 </resources>

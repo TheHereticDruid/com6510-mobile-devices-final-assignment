@@ -1,19 +1,26 @@
 package com6510.dcs.shef.ac.uk;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -25,19 +32,26 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, MapsInterface {
 
     private GoogleMap mMap;
+    private GalleryViewModel galleryViewModel;
     private static final int ACCESS_FINE_LOCATION = 123;
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private MapsAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Photo> mDataset=new ArrayList<Photo>();
     private boolean mLocationPermissionGranted;
+    private Button mSearch;
+    private PopupWindow searchPopup;
+    private View mPopupView;
 
     public class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
 
@@ -65,7 +79,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             TextView markerInfoLat= ((TextView)markerInfoView.findViewById(R.id.marker_info_lat));
             markerInfoLat.setText("Latitude: "+Double.toString(location.latitude));
             TextView markerInfoLng= ((TextView)markerInfoView.findViewById(R.id.marker_info_lng));
-            markerInfoLng.setText("Longitude"+Double.toString(location.longitude));
+            markerInfoLng.setText("Longitude: "+Double.toString(location.longitude));
             return markerInfoView;
         }
     }
@@ -78,16 +92,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         getLocationPermission();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        Bundle extras=getIntent().getExtras();
-        if(extras!=null){
-            mDataset=extras.getParcelableArrayList("Photos");
-        }
+//        Bundle extras=getIntent().getExtras();
+//        if(extras!=null){
+//            mDataset=extras.getParcelableArrayList("Photos");
+//        }
+        mPopupView = getLayoutInflater().inflate(R.layout.search_popup, null);
+        searchPopup = new PopupWindow(mPopupView);
         mRecyclerView = (RecyclerView) findViewById(R.id.imgStrip);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this, 0, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new MapsAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);
+        galleryViewModel=ViewModelProviders.of(this).get(GalleryViewModel.class);
+        galleryViewModel.refreshDatabase(getApplicationContext());
+        galleryViewModel.getAllPhotos().observe(this, new Observer<List<Photo>>(){
+            @Override
+            public void onChanged(@Nullable final List<Photo> photos) {
+                mDataset=(ArrayList<Photo>) photos;
+                System.out.println("onChanged: size " + photos.size());
+                reprocessData(mDataset);
+                if(mMap!=null){
+                    populateMap(mMap);
+                }
+            }});
+        mSearch = (Button) findViewById(R.id.imgSearch);
+        mSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchPopup.showAtLocation(findViewById(R.id.main_map_layout), Gravity.CENTER, 32, 32);
+            }
+        });
     }
 
 
@@ -103,15 +138,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) throws SecurityException{
         mMap = googleMap;
-        for(Photo location: mDataset) {
-            LatLng coords = new LatLng(location.getImLat(), location.getImLng());
-            mMap.addMarker(new MarkerOptions().position(coords).title(location.getImTitle()).icon(BitmapDescriptorFactory.fromPath(location.getImThumbPath())).snippet(location.getImThumbPath()));
-        }
         if(mLocationPermissionGranted) {
             mMap.setMyLocationEnabled(true);
         }
         mMap.animateCamera( CameraUpdateFactory.zoomTo( 5.0f ) );
         mMap.setInfoWindowAdapter(new MarkerInfoAdapter());
+        populateMap(mMap);
     }
 
     @Override
@@ -149,6 +181,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     mLocationPermissionGranted = true;
                 }
             }
+        }
+    }
+
+    private void reprocessData(ArrayList<Photo> dataset){
+        mAdapter.resetDataset(dataset);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private void populateMap(GoogleMap map) {
+        map.clear();
+        for(Photo location: mDataset) {
+            LatLng coords = new LatLng(location.getImLat(), location.getImLng());
+            Marker marker = mMap.addMarker(new MarkerOptions().position(coords).title(location.getImTitle()).icon(BitmapDescriptorFactory.fromPath(location.getImThumbPath())).snippet(location.getImThumbPath()));
         }
     }
 }

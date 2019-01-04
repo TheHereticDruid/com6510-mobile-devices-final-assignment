@@ -84,7 +84,6 @@ public class BrowseActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(v.getContext(), MapsActivity.class);
-                intent.putExtra("Photos", photoDataset);
                 startActivity(intent);
             }
         });

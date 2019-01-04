@@ -38,6 +38,11 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
         this.mContextWeakReference = new WeakReference<>(context);
     }
 
+    public void resetDataset(ArrayList<Photo> newData) {
+        mDataset.clear();
+        mDataset.addAll(newData);
+    }
+
     // Create new views (invoked by the layout manager)
     @Override
     public MapsAdapter.MapsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
