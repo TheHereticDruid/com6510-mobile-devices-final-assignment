@@ -20,9 +20,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class GalleryRepository extends ViewModel {
     private PhotoDao dbDao;
@@ -39,7 +41,7 @@ public class GalleryRepository extends ViewModel {
     /* ------------ DB wrappers ------------- */
 
     public Photo getPhoto(String path) {
-        Photo photo = new Photo(path);
+        Photo photo = new Photo(path, "");
         new GetAsyncTask(dbDao).execute(photo);
         return photo;
     }
@@ -127,33 +129,6 @@ public class GalleryRepository extends ViewModel {
         }
     }
 
-    public static void indexFile(PhotoRoomDatabase db, File sourceFile, String thumbnailDir) {
-        PhotoDao dao = db.photoDao();
-        System.out.println("Putting into db: " + sourceFile.getAbsolutePath());
-
-        /* generate thumbnail */
-        Bitmap original_bitmap = BitmapFactory.decodeFile(sourceFile.getAbsolutePath()); /* read photo from disk */
-        Bitmap thumbnail_bitmap = Bitmap.createScaledBitmap(original_bitmap, 100, 100, true);
-        File thumbnail_file = new File(thumbnailDir, sourceFile.getName() + "-" + sourceFile.lastModified());
-        try (FileOutputStream out = new FileOutputStream(thumbnail_file.getAbsolutePath())) {
-            thumbnail_bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        /* create Photo object to insert in db */
-        Photo photo = new Photo(sourceFile.getAbsolutePath());
-        photo.setImThumbPath(thumbnail_file.getAbsolutePath());
-        photo.setImTimestamp(sourceFile.lastModified());
-        photo.setImGps("");
-        photo.setImTitle("");
-
-        /* delete old copy from db */
-        //dao.deletePhoto(path);
-
-        /* insert in db */
-        dao.insertPhoto(photo);
-    }
-
     private static class ScanAsyncTask extends AsyncTask<Void, Void, Void> {
         private Context context;
         private PhotoDao mDao;
@@ -180,76 +155,92 @@ public class GalleryRepository extends ViewModel {
             Cursor cursor = MediaStore.Images.Media.query(context.getContentResolver(),
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     projection);
-            System.out.println("Indexing " + cursor.getCount() + " photos on phone.");
-            List<File> filesToBeIndexed = new ArrayList<File>();
+            System.out.println("Found " + cursor.getCount() + " photos on phone.");
             Set<String> pathsToBeIndexed = new HashSet<String>();
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 String path = cursor.getString(cursor.getColumnIndex("_data"));
-                File f = new File(path);
-                filesToBeIndexed.add(f);
-                pathsToBeIndexed.add(f.getAbsolutePath());
+                pathsToBeIndexed.add(path);
                 cursor.moveToNext();
-                //System.out.println("Indexing: " + path);
             }
 
             /* delete photos from db that do not exist anymore */
             for (Photo photo : db_photos) {
                 if (pathsToBeIndexed.contains(photo.getImPath()) == false) {
                     /* delete this photo from db */
-                    //System.out.println("Db entry does not exist anymore, deleting: " + photo.getImPath());
+                    System.out.println("Db entry does not exist anymore, deleting: " + photo.getImPath());
                     mDao.deletePhoto(photo.getImPath());
                 }
             }
 
-            /* create thumbnail dir if not already created, delete stale thumbnails */
+            /* create thumbnail dir if not already created */
             File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
             thumbnailDir.mkdir();
             System.out.println("Thumbnail dir: " + thumbnailDir.getAbsolutePath());
 
+            // delete stale thumbnails TODO - move to async thread
+            /*
             Map<String, Photo> thumb_photos_map = new HashMap<String, Photo>();
             for (Photo p: db_photos) {
                 thumb_photos_map.put(p.getImThumbPath(), p);
             }
             for (File f : thumbnailDir.listFiles()) {
-                if (!thumb_photos_map.containsKey(f.getAbsolutePath())) {
+                if (thumb_photos_map.containsKey(f.getAbsolutePath()) == false) {
                     f.delete();
                 }
             }
+            */
 
-            /* sort files to be indexed by modified timestamp */
-            Collections.sort(filesToBeIndexed, new Comparator<File>() {
-                @Override
-                public int compare(File o1, File o2) {
-                    return (int)(o1.lastModified() - o2.lastModified());
-                }
-            });
+            List<Photo> photosToInsert = new LinkedList<Photo>();
 
             /* read files, create thumbnails and store in db */
-            for (File file : filesToBeIndexed) {
-                String path = file.getAbsolutePath();
+            for (String path : pathsToBeIndexed) {
                 /* photo already exists in db */
                 if (db_photos_map.containsKey(path)) {
                     //System.out.println("Photo already exists in db: " + path);
-                    long db_ts = db_photos_map.get(path).getImTimestamp();
-                    long ix_ts = new File(path).lastModified();
-                    /* check modified timestamp in db is old */
-                    if (db_ts < ix_ts) {
-                        System.out.println("Db entry old, needs updating: " + path);
-                        /* need to update photo in db */
-                        indexFile(db, file, thumbnailDir.getAbsolutePath());
-                    }
                 } else {
-                    indexFile(db, file, thumbnailDir.getAbsolutePath());
+                    /* create Photo object to insert in db */
+                    Photo photo = new Photo(path, Util.getNewThumbnailPath(context));
+                    photo.setImTimestamp(0);
+                    photo.setImGps("");
+                    photo.setImTitle("");
+                    photosToInsert.add(photo);
                 }
             }
 
-            /* debug */
-            for (File f : thumbnailDir.listFiles()) {
-                //System.out.println(f.getAbsolutePath());
-            }
+            mDao.insertAllPhotos(photosToInsert);
+
+            System.out.println("Number of thumbnails on disk: " + thumbnailDir.listFiles().length);
 
             return null;
         }
+    }
+
+    public static void indexFile(Context context, PhotoRoomDatabase db, String sourcePath) {
+        PhotoDao dao = db.photoDao();
+        System.out.println("Putting into db: " + sourcePath);
+
+        /* generate thumbnail path to store in db, but don't create thumbnail */
+
+        //Bitmap original_bitmap = BitmapFactory.decodeFile(sourcePath.getAbsolutePath());
+        //Bitmap thumbnail_bitmap = Bitmap.createScaledBitmap(original_bitmap, 100, 100, true);
+        /*
+        try (FileOutputStream out = new FileOutputStream(thumbnail_file.getAbsolutePath())) {
+            thumbnail_bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        */
+        /* create Photo object to insert in db */
+        Photo photo = new Photo(sourcePath, Util.getNewThumbnailPath(context));
+        photo.setImTimestamp(0);
+        photo.setImGps("");
+        photo.setImTitle("");
+
+        /* delete old copy from db */
+        //dao.deletePhoto(path);
+
+        /* insert in db */
+        dao.insertPhoto(photo);
     }
 }

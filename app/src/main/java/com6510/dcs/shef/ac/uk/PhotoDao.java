@@ -25,6 +25,9 @@ public interface PhotoDao {
     @Query("SELECT * FROM Photo ORDER BY im_timestamp DESC")
     List<Photo> getAllPhotosSync();
 
+    @Insert (onConflict = OnConflictStrategy.REPLACE)
+    void insertAllPhotos(List<Photo> photos);
+
     @Query("DELETE FROM Photo")
     void deleteAllPhotos();
 }

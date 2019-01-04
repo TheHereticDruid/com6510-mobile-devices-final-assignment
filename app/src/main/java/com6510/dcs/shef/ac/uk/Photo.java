@@ -33,8 +33,9 @@ public class Photo implements Parcelable {
     private Bitmap imThumbnail;
 
     /* ------------ constructors -------------- */
-    public Photo(String imPath) {
+    public Photo(String imPath, String imThumbPath) {
         this.imPath = imPath;
+        this.imThumbPath = imThumbPath;
     }
 
     public Photo(Parcel in) {

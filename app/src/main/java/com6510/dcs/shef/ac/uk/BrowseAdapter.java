@@ -12,6 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +35,12 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
     private Context context;
     private List<Photo> photos = new ArrayList<>();
 
+    Bitmap emptyThumbnail;
+
     public BrowseAdapter(Context context) {
         this.context = context;
         mInflator = LayoutInflater.from(context);
+        emptyThumbnail = BitmapFactory.decodeResource(context.getResources(), R.drawable.blank_square);
     }
 
     @Override
@@ -50,14 +56,14 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
            current row on the RecyclerView */
         Photo photo = photos.get(position);
         if (photo.getImThumbnail() != null) {
-            /* thumbnail already cached */
+            /* thumbnail already cached inside adapter */
             holder.photoItemView.setImageBitmap(photo.getImThumbnail());
+            System.out.println("Thumbnail already cached for file " + photo.getImPath());
         } else {
-            /* load photo from disk asynchronously */
-            //new LoadSinglePhotoTask().execute(new HolderAndPosition(position, holder));
-            Bitmap bitmap = BitmapFactory.decodeFile(photo.getImThumbPath()); /* read photo from disk */
-            photo.setImThumbnail(bitmap);
-            holder.photoItemView.setImageBitmap(bitmap); /* set photo to grid element */
+            /* temporarily set empty thumbnail */
+            holder.photoItemView.setImageBitmap(emptyThumbnail);
+            /* load photo from disk asynchronously, create thumbnail, cache inside adapter */
+            new CreateThumbnailTask().execute(new HolderAndPosition(position, holder));
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,21 +96,41 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         result.dispatchUpdatesTo(this);
     }
 
-    private class LoadSinglePhotoTask extends AsyncTask<HolderAndPosition, Void, Bitmap> {
+    private class CreateThumbnailTask extends AsyncTask<HolderAndPosition, Void, Bitmap> {
         HolderAndPosition holderAndPosition;
 
         @Override
         protected Bitmap doInBackground(HolderAndPosition... holderAndPositions) {
             holderAndPosition = holderAndPositions[0];
             Photo photo = photos.get(holderAndPosition.position);
-            Bitmap bitmap = BitmapFactory.decodeFile(photo.getImThumbPath()); /* read photo from disk */
-            photo.setImThumbnail(bitmap);
-            return bitmap;
+
+            /* load thumbnail from disk if exists */
+            Bitmap thumbnailBitmap = BitmapFactory.decodeFile(photo.getImThumbPath());
+
+            /* load original photo and write its 100x100 thumbnail */
+            if (thumbnailBitmap == null) {
+                System.out.println("Building thumbnail for file " + photo.getImPath());
+                Bitmap originalBitmap = BitmapFactory.decodeFile(photo.getImPath());
+                thumbnailBitmap = Bitmap.createScaledBitmap(originalBitmap, 100, 100, true);
+
+                try (FileOutputStream out = new FileOutputStream(photo.getImThumbPath())) {
+                    thumbnailBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+                } catch (IOException e) {
+                    System.err.println("Error writing thumbail to file: " + photo.getImThumbPath());
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Thumbnail already built for file " + photo.getImPath());
+            }
+
+            /* cache thumbnail inside adapter to avoid reading from disk again */
+            photo.setImThumbnail(thumbnailBitmap);
+            return thumbnailBitmap;
         }
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            holderAndPosition.holder.photoItemView.setImageBitmap(bitmap); /* set photo to grid element */
+            holderAndPosition.holder.photoItemView.setImageBitmap(bitmap);
         }
     }
 

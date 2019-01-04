@@ -13,10 +13,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import pl.aprilapps.easyphotopicker.EasyImage;
 
@@ -82,5 +84,11 @@ public class Util {
         public Object getChangePayload(int oldItemPosition, int newItemPosition) {
             return super.getChangePayload(oldItemPosition, newItemPosition);
         }
+    }
+
+    public static String getNewThumbnailPath(Context context) {
+        File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
+        File thumbnailFile = new File(thumbnailDir, UUID.randomUUID().toString());
+        return thumbnailFile.getAbsolutePath();
     }
 }
