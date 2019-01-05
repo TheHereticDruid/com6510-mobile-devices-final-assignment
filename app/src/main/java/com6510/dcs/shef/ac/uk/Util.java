@@ -27,6 +27,12 @@ import pl.aprilapps.easyphotopicker.EasyImage;
 
 public class Util {
 
+    private static final int REQUEST_READ_EXTERNAL_STORAGE = 2987;
+    private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 7829;
+    private static final int REQUEST_ACCESS_FINE_LOCATION = 1357;
+    private static final int REQUEST_INTERNET = 5731;
+    private static final int REQUEST_ACCESS_NETWORK_STATE = 3715;
+
     public static Set<String> getDeclaredPermissions(Context context) {
         try {
             String[] grantedPermissions = context

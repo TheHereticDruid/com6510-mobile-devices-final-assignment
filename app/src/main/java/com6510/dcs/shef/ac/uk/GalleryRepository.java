@@ -29,13 +29,19 @@ import java.util.UUID;
 public class GalleryRepository extends ViewModel {
     private PhotoDao dbDao;
     private LiveData<List<Photo>> photos;
+    private LiveData<List<Photo>> filteredPhotos;
     private PhotoRoomDatabase db;
+    private String title;
+    private String date;
 
     public GalleryRepository(Application application) {
         db = PhotoRoomDatabase.getDatabase(application);
         dbDao = db.photoDao();
+        title="%%";
+        date="%%";
         /* live photos from db */
         photos = dbDao.getAllPhotos();
+        filteredPhotos = dbDao.getFilteredPhotos(title, date);
     }
 
     /* ------------ DB wrappers ------------- */
@@ -56,6 +62,13 @@ public class GalleryRepository extends ViewModel {
 
     public LiveData<List<Photo>> getAllPhotos() {
         return photos;
+    }
+
+    public LiveData<List<Photo>> getFilteredPhotos(String title, String date) {
+        this.title=title;
+        this.date=date;
+        filteredPhotos = dbDao.getFilteredPhotos(title, date);
+        return filteredPhotos;
     }
 
     public List<Photo> getAllPhotosSync() {
@@ -145,7 +158,7 @@ public class GalleryRepository extends ViewModel {
             /* current db photos */
             List<Photo> db_photos = mDao.getAllPhotosSync();
             Map<String, Photo> db_photos_map = new HashMap<String, Photo>();
-            for (Photo p: db_photos) {
+            for (Photo p : db_photos) {
                 db_photos_map.put(p.getImPath(), p);
             }
             System.out.println("Found " + db_photos_map.size() + " photos in db.");
@@ -181,7 +194,7 @@ public class GalleryRepository extends ViewModel {
             // delete stale thumbnails TODO - move to async thread
             /*
             Map<String, Photo> thumb_photos_map = new HashMap<String, Photo>();
-            for (Photo p: db_photos) {
+            for (Photo p : db_photos) {
                 thumb_photos_map.put(p.getImThumbPath(), p);
             }
             for (File f : thumbnailDir.listFiles()) {

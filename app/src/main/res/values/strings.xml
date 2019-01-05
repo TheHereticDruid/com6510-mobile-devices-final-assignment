@@ -5,4 +5,9 @@
     <string name="grid_view">Grid View</string>
     <string name="map_view">Map View</string>
     <string name="no_photos_available">Add some photos, will you?</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="slide_show_image">Slide Show Image</string>
+    <string name="search_by_title">Search by Title</string>
+    <string name="reset_conditions">Submit an empty string to reset the filter</string>
+    <string name="search_button">Search</string>
 </resources>

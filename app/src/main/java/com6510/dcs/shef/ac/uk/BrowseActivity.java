@@ -44,6 +44,7 @@ public class BrowseActivity extends AppCompatActivity {
     
     /* ViewModel */
     private GalleryViewModel viewModel;
+    private ArrayList<Photo> photoDataset;
 
     private RecyclerView recyclerView;
     private TextView emptyView;
@@ -131,6 +132,7 @@ public class BrowseActivity extends AppCompatActivity {
         viewModel.getAllPhotos().observe(this, new Observer<List<Photo>>(){
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {
+                photoDataset=(ArrayList<Photo>) photos;
                 System.out.println("onChanged: size " + photos.size());
 
                 /* show message if no photos found */
@@ -160,6 +162,15 @@ public class BrowseActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 EasyImage.openGallery(getActivity(), 0);
+            }
+        });
+
+        FloatingActionButton fabMap = (FloatingActionButton) findViewById(R.id.fab_map);
+        fabMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(v.getContext(), MapsActivity.class);
+                startActivity(intent);
             }
         });
 
