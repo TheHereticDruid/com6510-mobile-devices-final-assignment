@@ -30,26 +30,17 @@ public class Photo implements Parcelable {
     @ColumnInfo(name = "im_description")
     private String imDescription;
 
-    @Embedded
-    private Coordinates imCoordinates;
+    @ColumnInfo(name = "im_lat")
+    float imLat;
+
+    @ColumnInfo(name = "im_lng")
+    float imLng;
 
     @ColumnInfo(name = "im_datetime")
     private String imDateTime;
 
     @Ignore
     private Bitmap imThumbnail;
-
-    public static class Coordinates {
-        @ColumnInfo(name = "im_lat")
-        float latitude;
-        @ColumnInfo(name = "im_long")
-        float longitude;
-
-        public Coordinates(float latitude, float longitude) {
-            this.latitude = latitude;
-            this.longitude = longitude;
-        }
-    }
 
     /* ------------ constructors -------------- */
     public Photo(String imPath, String imThumbPath) {
@@ -62,8 +53,8 @@ public class Photo implements Parcelable {
         this.imThumbPath = in.readString();
         this.imTimestamp = in.readLong();
         this.imTitle = in.readString();
-        this.imCoordinates.latitude = in.readFloat();
-        this.imCoordinates.longitude = in.readFloat();
+        this.imLat = in.readFloat();
+        this.imLng = in.readFloat();
     }
 
     /* ------------ getters and setters ---------------*/
@@ -89,14 +80,6 @@ public class Photo implements Parcelable {
 
     public void setImTitle(String imTitle) {
         this.imTitle = imTitle;
-    }
-
-    public Coordinates getImCoordinates() {
-        return imCoordinates;
-    }
-
-    public void setImCoordinates(Coordinates imCoordinates) {
-        this.imCoordinates = imCoordinates;
     }
 
     public long getImTimestamp() {
@@ -131,6 +114,22 @@ public class Photo implements Parcelable {
         this.imDescription = imDescription;
     }
 
+    public float getImLat() {
+        return imLat;
+    }
+
+    public void setImLat(float imLat) {
+        this.imLat = imLat;
+    }
+
+    public float getImLng() {
+        return imLng;
+    }
+
+    public void setImLng(float imLng) {
+        this.imLng = imLng;
+    }
+
     /* --------------------- parcels -------------------- */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -138,8 +137,8 @@ public class Photo implements Parcelable {
         dest.writeString(this.imThumbPath);
         dest.writeLong(this.imTimestamp);
         dest.writeString(this.imTitle);
-        dest.writeFloat(this.imCoordinates.latitude);
-        dest.writeFloat(this.imCoordinates.longitude);
+        dest.writeFloat(this.imLat);
+        dest.writeFloat(this.imLng);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

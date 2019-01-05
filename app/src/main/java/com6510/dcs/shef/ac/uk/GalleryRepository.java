@@ -190,6 +190,7 @@ public class GalleryRepository extends ViewModel {
             File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
             thumbnailDir.mkdir();
             System.out.println("Thumbnail dir: " + thumbnailDir.getAbsolutePath());
+            System.out.println("Number of thumbnails on disk: " + thumbnailDir.listFiles().length);
 
             // delete stale thumbnails TODO - move to async thread
             /*
@@ -214,15 +215,14 @@ public class GalleryRepository extends ViewModel {
                 } else {
                     /* create Photo object to insert in db */
                     Photo photo = new Photo(path, Util.getNewThumbnailPath(context));
-                    photo.setImTimestamp(0);
+                    /* set timestamp so that order of photos remains invariant as they appear on grid */
+                    photo.setImTimestamp(new File(path).lastModified());
                     photosToInsert.add(photo);
                 }
             }
 
+            /* insert all photos at once, resulting in only one onChanged callback */
             mDao.insertAllPhotos(photosToInsert);
-
-            System.out.println("Number of thumbnails on disk: " + thumbnailDir.listFiles().length);
-
             return null;
         }
     }

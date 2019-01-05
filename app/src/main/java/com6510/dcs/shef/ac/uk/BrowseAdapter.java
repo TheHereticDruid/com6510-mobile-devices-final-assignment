@@ -127,7 +127,9 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
             if (photo.getImTimestamp() == 0 ||
                     photoFile.lastModified() > photo.getImTimestamp() ||
                     thumbnailBitmap == null) {
+                System.out.println("Need to index file: " + photo.getImPath());
                 indexPhotoMetadata(photoFile, photoStream, photo);
+                photoStream.reset();
                 thumbnailBitmap = makeThumbnail(photo, photoStream);
             }
 
@@ -148,9 +150,10 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
             try {
                 ExifInterface exifInterface = new ExifInterface(photoStream);
                 // Coordinates
-                float[] latlong = new float[2];
-                if (exifInterface.getLatLong(latlong)) {
-                    photo.setImCoordinates(new Photo.Coordinates(latlong[0], latlong[1]));
+                float[] latlng = new float[2];
+                if (exifInterface.getLatLong(latlng)) {
+                    photo.setImLat(latlng[0]);
+                    photo.setImLng(latlng[1]);
                 }
                 // Title
                 String val;
