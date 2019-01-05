@@ -35,6 +35,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
@@ -71,18 +72,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public View getInfoContents(Marker marker){
+            HashMap<String, String> extraValues=(HashMap<String, String>) marker.getTag();
             ImageView markerInfoThumbnail= ((ImageView)markerInfoView.findViewById(R.id.marker_info_thumbnail));
-            Drawable drawable=Drawable.createFromPath(marker.getSnippet());
+            Drawable drawable=Drawable.createFromPath(extraValues.get("ThumbnailPath"));
             markerInfoThumbnail.setImageBitmap(((BitmapDrawable)drawable).getBitmap());
             TextView markerInfoTitle= ((TextView)markerInfoView.findViewById(R.id.marker_info_title));
             markerInfoTitle.setText(marker.getTitle());
             markerInfoTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, markerInfoTitle.getTextSize()*1.5f);
             markerInfoTitle.setTypeface(null, Typeface.BOLD);
+            TextView markerInfoDesc= ((TextView)markerInfoView.findViewById(R.id.marker_info_description));
+            markerInfoTitle.setText(extraValues.get("Description"));
             LatLng location=marker.getPosition();
             TextView markerInfoLat= ((TextView)markerInfoView.findViewById(R.id.marker_info_lat));
-            markerInfoLat.setText("Latitude: "+Double.toString(location.latitude));
+            markerInfoLat.setText(String.format("Latitude: %.6f", location.latitude));
             TextView markerInfoLng= ((TextView)markerInfoView.findViewById(R.id.marker_info_lng));
-            markerInfoLng.setText("Longitude: "+Double.toString(location.longitude));
+            markerInfoLng.setText(String.format("Longitude: %.6f", location.longitude));
+            if(extraValues.get("Date")!=null && !extraValues.get("Date").isEmpty()) {
+                TextView markerInfoDate = ((TextView) markerInfoView.findViewById(R.id.marker_info_date));
+                markerInfoDate.setText(String.format("Date: %s", extraValues.get("Date")));
+            }
             return markerInfoView;
         }
     }
@@ -190,7 +198,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         map.clear();
         for(Photo location: mDataset) {
             LatLng coords = new LatLng(location.getImLat(), location.getImLng());
-            Marker marker = mMap.addMarker(new MarkerOptions().position(coords).title(location.getImTitle()).icon(BitmapDescriptorFactory.fromPath(location.getImThumbPath())).snippet(location.getImThumbPath()));
+            Marker marker = mMap.addMarker(new MarkerOptions().position(coords).title(location.getImTitle()).icon(BitmapDescriptorFactory.fromPath(location.getImThumbPath())));
+            HashMap<String, String> extraValues=new HashMap<>();
+            extraValues.put("ThumbnailPath", location.getImThumbPath());
+            extraValues.put("Description", location.getImDescription());
+            extraValues.put("Date", location.getImDateTime());
+            marker.setTag(extraValues);
         }
     }
 
