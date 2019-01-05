@@ -143,7 +143,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void thumbnailClick(Photo photo){
-        LatLng movLoc = new LatLng(photo.getImLat(), photo.getImLng());
+        Photo.Coordinates coordinates = photo.getImCoordinates();
+        LatLng movLoc = new LatLng(coordinates.latitude, coordinates.longitude);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(movLoc,14));
     }
 
@@ -187,7 +188,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void populateMap(GoogleMap map) {
         map.clear();
         for(Photo location: mDataset) {
-            LatLng coords = new LatLng(location.getImLat(), location.getImLng());
+            Photo.Coordinates coordinates = location.getImCoordinates();
+            LatLng coords = new LatLng(coordinates.latitude, coordinates.longitude);
             Marker marker = mMap.addMarker(new MarkerOptions().position(coords).title(location.getImTitle()).icon(BitmapDescriptorFactory.fromPath(location.getImThumbPath())).snippet(location.getImThumbPath()));
         }
     }
