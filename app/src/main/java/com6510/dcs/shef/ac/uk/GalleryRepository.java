@@ -22,13 +22,19 @@ import java.util.Set;
 public class GalleryRepository extends ViewModel {
     private PhotoDao dbDao;
     private LiveData<List<Photo>> photos;
+    private LiveData<List<Photo>> filteredPhotos;
     private PhotoRoomDatabase db;
+    private String title;
+    private String date;
 
     public GalleryRepository(Application application) {
         db = PhotoRoomDatabase.getDatabase(application);
         dbDao = db.photoDao();
+        title="%%";
+        date="%%";
         /* live photos from db */
         photos = dbDao.getAllPhotos();
+        filteredPhotos = dbDao.getFilteredPhotos(title, date);
     }
 
     /* ------------ DB wrappers ------------- */
@@ -49,6 +55,13 @@ public class GalleryRepository extends ViewModel {
 
     public LiveData<List<Photo>> getAllPhotos() {
         return photos;
+    }
+
+    public LiveData<List<Photo>> getFilteredPhotos(String title, String date) {
+        this.title=title;
+        this.date=date;
+        filteredPhotos = dbDao.getFilteredPhotos(title, date);
+        return filteredPhotos;
     }
 
     public List<Photo> getAllPhotosSync() {

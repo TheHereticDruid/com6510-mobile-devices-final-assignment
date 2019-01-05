@@ -10,13 +10,19 @@ import java.util.List;
 public class GalleryViewModel extends AndroidViewModel {
     private GalleryRepository repository;
     private LiveData<List<Photo>> photos;
+    private LiveData<List<Photo>> filteredPhotos;
+    private String title;
+    private String date;
 
     public GalleryViewModel(Application application) {
         super(application);
         /* create connection to repository */
+        this.title="%%";
+        this.date="%%";
         repository = new GalleryRepository(application);
         /* subscribe to live data */
         photos = repository.getAllPhotos();
+        filteredPhotos = repository.getFilteredPhotos(title, date);
     }
 
     public GalleryRepository getRepository() {
@@ -25,6 +31,13 @@ public class GalleryViewModel extends AndroidViewModel {
 
     LiveData<List<Photo>> getAllPhotos() {
         return photos;
+    }
+
+    LiveData<List<Photo>> getFilteredPhotos(String title, String date) {
+        this.title=title;
+        this.date=date;
+        filteredPhotos = repository.getFilteredPhotos(title, date);
+        return filteredPhotos;
     }
 
     List<Photo> getAllPhotosSync() { return repository.getAllPhotosSync(); }

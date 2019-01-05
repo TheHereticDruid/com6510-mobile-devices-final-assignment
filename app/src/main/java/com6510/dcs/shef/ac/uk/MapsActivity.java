@@ -52,6 +52,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Button mSearch;
     private PopupWindow searchPopup;
     private View mPopupView;
+    private String title;
+    private String date;
 
     public class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
 
@@ -88,6 +90,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        title="%%";
+        date="%%";
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         getLocationPermission();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -104,23 +108,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new MapsAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);
-        galleryViewModel=ViewModelProviders.of(this).get(GalleryViewModel.class);
-        galleryViewModel.refreshDatabase(getApplicationContext());
-        galleryViewModel.getAllPhotos().observe(this, new Observer<List<Photo>>(){
-            @Override
-            public void onChanged(@Nullable final List<Photo> photos) {
-                mDataset=(ArrayList<Photo>) photos;
-                System.out.println("onChanged: size " + photos.size());
-                reprocessData(mDataset);
-                if(mMap!=null){
-                    populateMap(mMap);
-                }
-            }});
+        queueData();
         mSearch = (Button) findViewById(R.id.imgSearch);
         mSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                searchPopup.showAtLocation(findViewById(R.id.main_map_layout), Gravity.CENTER, 32, 32);
+                title="%y%";
+                queueData();
+//                searchPopup.showAtLocation(findViewById(R.id.main_map_layout), Gravity.CENTER, 32, 32);
             }
         });
     }
@@ -195,5 +190,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LatLng coords = new LatLng(location.getImLat(), location.getImLng());
             Marker marker = mMap.addMarker(new MarkerOptions().position(coords).title(location.getImTitle()).icon(BitmapDescriptorFactory.fromPath(location.getImThumbPath())).snippet(location.getImThumbPath()));
         }
+    }
+
+    private void queueData() {
+        galleryViewModel=ViewModelProviders.of(this).get(GalleryViewModel.class);
+        galleryViewModel.refreshDatabase(getApplicationContext());
+        galleryViewModel.getFilteredPhotos(title, date).observe(this, new Observer<List<Photo>>(){
+            @Override
+            public void onChanged(@Nullable final List<Photo> photos) {
+                mDataset=(ArrayList<Photo>) photos;
+                System.out.println("onChanged: size " + photos.size());
+                reprocessData(mDataset);
+                if(mMap!=null){
+                    populateMap(mMap);
+                }
+            }});
     }
 }
