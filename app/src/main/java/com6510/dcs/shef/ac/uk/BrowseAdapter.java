@@ -160,13 +160,22 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
                 if ((val = exifInterface.getAttribute("Title")) != null) {
                     photo.setImTitle(val);
                 }
+                else {
+                    photo.setImTitle(photoFile.getName());
+                }
                 // Description
                 if ((val = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION)) != null) {
                     photo.setImDescription(val);
                 }
+                else {
+                    photo.setImDescription("");
+                }
                 // DateTime
                 if ((val = exifInterface.getAttribute(ExifInterface.TAG_DATETIME)) != null) {
                     photo.setImDateTime(val);
+                }
+                else {
+                    photo.setImDateTime("");
                 }
                 /*
                 // Artist

@@ -31,6 +31,6 @@ public interface PhotoDao {
     @Query("DELETE FROM Photo")
     void deleteAllPhotos();
 
-    @Query("SELECT * FROM Photo WHERE im_title LIKE :title AND im_timestamp LIKE :date")
-    LiveData<List<Photo>> getFilteredPhotos(String title, String date);
+    @Query("SELECT * FROM Photo WHERE im_title LIKE :title AND im_description like :description AND im_datetime LIKE :date")
+    LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date);
 }

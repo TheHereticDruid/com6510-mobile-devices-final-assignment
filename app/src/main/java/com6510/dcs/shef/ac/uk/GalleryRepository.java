@@ -32,16 +32,18 @@ public class GalleryRepository extends ViewModel {
     private LiveData<List<Photo>> filteredPhotos;
     private PhotoRoomDatabase db;
     private String title;
+    private String description;
     private String date;
 
     public GalleryRepository(Application application) {
         db = PhotoRoomDatabase.getDatabase(application);
         dbDao = db.photoDao();
         title="%%";
+        description="%%";
         date="%%";
         /* live photos from db */
         photos = dbDao.getAllPhotos();
-        filteredPhotos = dbDao.getFilteredPhotos(title, date);
+        filteredPhotos = dbDao.getFilteredPhotos(title, description, date);
     }
 
     /* ------------ DB wrappers ------------- */
@@ -64,10 +66,11 @@ public class GalleryRepository extends ViewModel {
         return photos;
     }
 
-    public LiveData<List<Photo>> getFilteredPhotos(String title, String date) {
+    public LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date) {
         this.title=title;
+        this.description=description;
         this.date=date;
-        filteredPhotos = dbDao.getFilteredPhotos(title, date);
+        filteredPhotos = dbDao.getFilteredPhotos(title, description, date);
         return filteredPhotos;
     }
 

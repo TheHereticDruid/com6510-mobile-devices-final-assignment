@@ -12,17 +12,19 @@ public class GalleryViewModel extends AndroidViewModel {
     private LiveData<List<Photo>> photos;
     private LiveData<List<Photo>> filteredPhotos;
     private String title;
+    private String description;
     private String date;
 
     public GalleryViewModel(Application application) {
         super(application);
         /* create connection to repository */
         this.title="%%";
+        this.description="%%";
         this.date="%%";
         repository = new GalleryRepository(application);
         /* subscribe to live data */
         photos = repository.getAllPhotos();
-        filteredPhotos = repository.getFilteredPhotos(title, date);
+        filteredPhotos = repository.getFilteredPhotos(title, description, date);
     }
 
     public GalleryRepository getRepository() {
@@ -33,10 +35,11 @@ public class GalleryViewModel extends AndroidViewModel {
         return photos;
     }
 
-    LiveData<List<Photo>> getFilteredPhotos(String title, String date) {
+    LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date) {
         this.title=title;
+        this.description=description;
         this.date=date;
-        filteredPhotos = repository.getFilteredPhotos(title, date);
+        filteredPhotos = repository.getFilteredPhotos(title, description, date);
         return filteredPhotos;
     }
 

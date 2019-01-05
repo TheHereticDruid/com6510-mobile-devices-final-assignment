@@ -53,6 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private PopupWindow searchPopup;
     private View mPopupView;
     private String title;
+    private String description;
     private String date;
 
     public class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
@@ -91,6 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         title="%%";
+        description="%%";
         date="%%";
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         getLocationPermission();
@@ -195,7 +197,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void queueData() {
         galleryViewModel=ViewModelProviders.of(this).get(GalleryViewModel.class);
         galleryViewModel.refreshDatabase(getApplicationContext());
-        galleryViewModel.getFilteredPhotos(title, date).observe(this, new Observer<List<Photo>>(){
+        galleryViewModel.getFilteredPhotos(title, description, date).observe(this, new Observer<List<Photo>>(){
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {
                 mDataset=(ArrayList<Photo>) photos;
