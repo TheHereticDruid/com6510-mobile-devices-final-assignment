@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -12,9 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,13 +37,16 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
     }
 
     private LayoutInflater mInflator;
-    private Context context;
     private List<Photo> photos = new ArrayList<>();
+
+    private Context context;
+    private GalleryViewModel viewModel;
 
     Bitmap emptyThumbnail;
 
-    public BrowseAdapter(Context context) {
+    public BrowseAdapter(Context context, GalleryViewModel viewModel) {
         this.context = context;
+        this.viewModel = viewModel;
         mInflator = LayoutInflater.from(context);
         emptyThumbnail = BitmapFactory.decodeResource(context.getResources(), R.drawable.blank_square);
     }
@@ -62,8 +70,8 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         } else {
             /* temporarily set empty thumbnail */
             holder.photoItemView.setImageBitmap(emptyThumbnail);
-            /* load photo from disk asynchronously, create thumbnail, cache inside adapter */
-            new CreateThumbnailTask().execute(new HolderAndPosition(position, holder));
+            /* load photo from disk asynchronously, cache inside adapter */
+            new LoadSinglePhotoTask().execute(new HolderAndPosition(position, holder));
         }
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,7 +104,7 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         result.dispatchUpdatesTo(this);
     }
 
-    private class CreateThumbnailTask extends AsyncTask<HolderAndPosition, Void, Bitmap> {
+    private class LoadSinglePhotoTask extends AsyncTask<HolderAndPosition, Void, Bitmap> {
         HolderAndPosition holderAndPosition;
 
         @Override
@@ -104,23 +112,23 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
             holderAndPosition = holderAndPositions[0];
             Photo photo = photos.get(holderAndPosition.position);
 
+            File photoFile = new File(photo.getImPath());
+            /* load file into memory */
+            byte[] photoBytes = Util.fileToByteArray(photoFile.getAbsolutePath());
+            ByteArrayInputStream photoStream = new ByteArrayInputStream(photoBytes);
             /* load thumbnail from disk if exists */
             Bitmap thumbnailBitmap = BitmapFactory.decodeFile(photo.getImThumbPath());
 
-            /* load original photo and write its 100x100 thumbnail */
-            if (thumbnailBitmap == null) {
-                System.out.println("Building thumbnail for file " + photo.getImPath());
-                Bitmap originalBitmap = BitmapFactory.decodeFile(photo.getImPath());
-                thumbnailBitmap = Bitmap.createScaledBitmap(originalBitmap, 100, 100, true);
-
-                try (FileOutputStream out = new FileOutputStream(photo.getImThumbPath())) {
-                    thumbnailBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
-                } catch (IOException e) {
-                    System.err.println("Error writing thumbail to file: " + photo.getImThumbPath());
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("Thumbnail already built for file " + photo.getImPath());
+            /* update photo metadata in room db if:
+               1. it has never been done (ts=0)
+               2. file has been modified since it was last indexed
+               3. thumbnail file does not exist
+             */
+            if (photo.getImTimestamp() == 0 ||
+                    photoFile.lastModified() > photo.getImTimestamp() ||
+                    thumbnailBitmap == null) {
+                indexPhotoMetadata(photoFile, photoStream, photo);
+                thumbnailBitmap = makeThumbnail(photo, photoStream);
             }
 
             /* cache thumbnail inside adapter to avoid reading from disk again */
@@ -131,6 +139,66 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             holderAndPosition.holder.photoItemView.setImageBitmap(bitmap);
+        }
+
+        void indexPhotoMetadata(File photoFile, ByteArrayInputStream photoStream, Photo photo) {
+            /* update timestamp */
+            photo.setImTimestamp(photoFile.lastModified());
+            /* update EXIF metadata in db */
+            try {
+                ExifInterface exifInterface = new ExifInterface(photoStream);
+                // Coordinates
+                float[] latlong = new float[2];
+                if (exifInterface.getLatLong(latlong)) {
+                    photo.setImCoordinates(new Photo.Coordinates(latlong[0], latlong[1]));
+                }
+                // Title
+                String val;
+                if ((val = exifInterface.getAttribute("Title")) != null) {
+                    photo.setImTitle(val);
+                }
+                // Description
+                if ((val = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION)) != null) {
+                    photo.setImDescription(val);
+                }
+                // DateTime
+                if ((val = exifInterface.getAttribute(ExifInterface.TAG_DATETIME)) != null) {
+                    photo.setImDateTime(val);
+                }
+                /*
+                // Artist
+                if ((val = exifInterface.getAttribute(ExifInterface.TAG_ARTIST)) != null) {
+                    photo.setImArtist(val);
+                }
+                // Make
+                if ((val = exifInterface.getAttribute(ExifInterface.TAG_MAKE)) != null) {
+                    photo.setImMake(val);
+                }
+                // Model
+                if ((val = exifInterface.getAttribute(ExifInterface.TAG_MODEL)) != null) {
+                    photo.setImModel(val);
+                }
+                */
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            /* update photo in db */
+            viewModel.insertPhoto(photo);
+        }
+
+        Bitmap makeThumbnail(Photo photo, ByteArrayInputStream photoStream) {
+            /* generate 100x100 thumbnail */
+            System.out.println("Building thumbnail for file " + photo.getImPath());
+            Bitmap originalBitmap = BitmapFactory.decodeStream(photoStream);
+            Bitmap thumbnailBitmap = Bitmap.createScaledBitmap(originalBitmap, 100, 100, true);
+            try (FileOutputStream out = new FileOutputStream(photo.getImThumbPath())) {
+                thumbnailBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
+            } catch (IOException e) {
+                System.err.println("Error writing thumbail to file: " + photo.getImThumbPath());
+                e.printStackTrace();
+            }
+            return thumbnailBitmap;
         }
     }
 

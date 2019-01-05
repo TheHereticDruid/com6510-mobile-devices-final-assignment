@@ -202,8 +202,6 @@ public class GalleryRepository extends ViewModel {
                     /* create Photo object to insert in db */
                     Photo photo = new Photo(path, Util.getNewThumbnailPath(context));
                     photo.setImTimestamp(0);
-                    photo.setImGps("");
-                    photo.setImTitle("");
                     photosToInsert.add(photo);
                 }
             }
@@ -234,8 +232,6 @@ public class GalleryRepository extends ViewModel {
         /* create Photo object to insert in db */
         Photo photo = new Photo(sourcePath, Util.getNewThumbnailPath(context));
         photo.setImTimestamp(0);
-        photo.setImGps("");
-        photo.setImTitle("");
 
         /* delete old copy from db */
         //dao.deletePhoto(path);

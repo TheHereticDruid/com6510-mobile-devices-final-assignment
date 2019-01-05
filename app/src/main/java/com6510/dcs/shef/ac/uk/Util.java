@@ -13,7 +13,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -90,5 +93,19 @@ public class Util {
         File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
         File thumbnailFile = new File(thumbnailDir, UUID.randomUUID().toString());
         return thumbnailFile.getAbsolutePath();
+    }
+
+    public static byte[] fileToByteArray(String path) {
+        File file = new File(path);
+        byte[] bytes = new byte[(int)file.length()];
+        try {
+            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+            buf.read(bytes, 0, bytes.length);
+            buf.close();
+        } catch (IOException e) {
+            System.err.println("Could not read photo in memory: " + file.getAbsolutePath());
+            e.printStackTrace();
+        }
+        return bytes;
     }
 }

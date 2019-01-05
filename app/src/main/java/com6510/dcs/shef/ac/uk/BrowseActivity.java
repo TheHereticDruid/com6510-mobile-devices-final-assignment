@@ -116,13 +116,13 @@ public class BrowseActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
         recyclerView.setHasFixedSize(true);
 
-        /* set recycle view adapter */
-        adapter = new BrowseAdapter(this);
-        recyclerView.setAdapter(adapter);
-        //adapter.setHasStableIds(true);
-
         /* build viewmodel */
         viewModel = ViewModelProviders.of(this).get(GalleryViewModel.class);
+
+        /* set recycle view adapter */
+        adapter = new BrowseAdapter(this, viewModel);
+        recyclerView.setAdapter(adapter);
+        //adapter.setHasStableIds(true);
 
         /* start async task to scan phone for photos */
         viewModel.refreshDatabase(getApplicationContext());

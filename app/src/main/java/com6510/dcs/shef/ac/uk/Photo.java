@@ -1,6 +1,7 @@
 package com6510.dcs.shef.ac.uk;
 
 import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
@@ -20,17 +21,35 @@ public class Photo implements Parcelable {
     @ColumnInfo(name = "im_thumb_path")
     private String imThumbPath;
 
-    @ColumnInfo(name = "im_title")
-    private String imTitle;
-
-    @ColumnInfo(name = "im_gps")
-    private String imGps;
-
     @ColumnInfo(name = "im_timestamp")
     private long imTimestamp;
 
+    @ColumnInfo(name = "im_title")
+    private String imTitle;
+
+    @ColumnInfo(name = "im_description")
+    private String imDescription;
+
+    @Embedded
+    private Coordinates imCoordinates;
+
+    @ColumnInfo(name = "im_datetime")
+    private String imDateTime;
+
     @Ignore
     private Bitmap imThumbnail;
+
+    public static class Coordinates {
+        @ColumnInfo(name = "im_lat")
+        float latitude;
+        @ColumnInfo(name = "im_long")
+        float longitude;
+
+        public Coordinates(float latitude, float longitude) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+    }
 
     /* ------------ constructors -------------- */
     public Photo(String imPath, String imThumbPath) {
@@ -41,9 +60,10 @@ public class Photo implements Parcelable {
     public Photo(Parcel in) {
         this.imPath = in.readString();
         this.imThumbPath = in.readString();
-        this.imTitle = in.readString();
-        this.imGps = in.readString();
         this.imTimestamp = in.readLong();
+        this.imTitle = in.readString();
+        this.imCoordinates.latitude = in.readFloat();
+        this.imCoordinates.longitude = in.readFloat();
     }
 
     /* ------------ getters and setters ---------------*/
@@ -71,12 +91,12 @@ public class Photo implements Parcelable {
         this.imTitle = imTitle;
     }
 
-    public String getImGps() {
-        return imGps;
+    public Coordinates getImCoordinates() {
+        return imCoordinates;
     }
 
-    public void setImGps(String imGps) {
-        this.imGps = imGps;
+    public void setImCoordinates(Coordinates imCoordinates) {
+        this.imCoordinates = imCoordinates;
     }
 
     public long getImTimestamp() {
@@ -95,14 +115,31 @@ public class Photo implements Parcelable {
         this.imThumbnail = imThumbnail;
     }
 
-    /* parcels */
+    public String getImDateTime() {
+        return imDateTime;
+    }
+
+    public void setImDateTime(String imDateTime) {
+        this.imDateTime = imDateTime;
+    }
+
+    public String getImDescription() {
+        return imDescription;
+    }
+
+    public void setImDescription(String imDescription) {
+        this.imDescription = imDescription;
+    }
+
+    /* --------------------- parcels -------------------- */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.imPath);
         dest.writeString(this.imThumbPath);
-        dest.writeString(this.imTitle);
-        dest.writeString(this.imGps);
         dest.writeLong(this.imTimestamp);
+        dest.writeString(this.imTitle);
+        dest.writeFloat(this.imCoordinates.latitude);
+        dest.writeFloat(this.imCoordinates.longitude);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
