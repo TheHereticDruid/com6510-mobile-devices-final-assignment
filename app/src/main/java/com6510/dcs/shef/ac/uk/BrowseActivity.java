@@ -1,24 +1,18 @@
 package com6510.dcs.shef.ac.uk;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -34,7 +28,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
@@ -167,6 +160,7 @@ public class BrowseActivity extends AppCompatActivity {
             }
         });
 
+        /* floating button to open map view */
         FloatingActionButton fabMap = (FloatingActionButton) findViewById(R.id.fab_map);
         fabMap.setOnClickListener(new View.OnClickListener() {
             @Override

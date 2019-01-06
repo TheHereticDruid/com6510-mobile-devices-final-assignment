@@ -33,8 +33,7 @@
             android:value="@string/google_maps_key" />
         <activity
             android:name="com6510.dcs.shef.ac.uk.MapsActivity"
-            android:label="@string/title_activity_maps"
-            android:screenOrientation="landscape">
+            android:label="@string/title_activity_maps">
         </activity>
     </application>
 

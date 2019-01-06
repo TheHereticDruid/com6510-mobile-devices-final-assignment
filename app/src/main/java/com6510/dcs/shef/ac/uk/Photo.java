@@ -1,7 +1,6 @@
 package com6510.dcs.shef.ac.uk;
 
 import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
@@ -35,6 +34,9 @@ public class Photo implements Parcelable {
 
     @ColumnInfo(name = "im_lng")
     float imLng;
+
+    @ColumnInfo(name = "im_has_coordinates")
+    boolean hasCoordinates;
 
     @ColumnInfo(name = "im_datetime")
     private String imDateTime;
@@ -128,6 +130,14 @@ public class Photo implements Parcelable {
 
     public void setImLng(float imLng) {
         this.imLng = imLng;
+    }
+
+    public boolean getImHasCoordinates() {
+        return hasCoordinates;
+    }
+
+    public void setImHasCoordinates(boolean hasCoordinates) {
+        this.hasCoordinates = hasCoordinates;
     }
 
     /* --------------------- parcels -------------------- */

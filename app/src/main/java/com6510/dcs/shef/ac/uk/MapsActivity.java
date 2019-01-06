@@ -2,22 +2,18 @@ package com6510.dcs.shef.ac.uk;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -32,9 +28,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,17 +35,20 @@ import com6510.dcs.shef.ac.uk.gallery.R;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, MapsInterface {
 
+    /* maps */
     private GoogleMap mMap;
+
+    /* MVVM */
     private GalleryViewModel galleryViewModel;
-    private static final int ACCESS_FINE_LOCATION = 123;
+
+    /* UI */
     private RecyclerView mRecyclerView;
     private MapsAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private ArrayList<Photo> mDataset=new ArrayList<Photo>();
-    private boolean mLocationPermissionGranted;
     private Button mSearch;
     private PopupWindow searchPopup;
     private View mPopupView;
+
     private String title;
     private String description;
     private String date;
@@ -99,126 +95,84 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
         title="%%";
         description="%%";
         date="%%";
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        getLocationPermission();
+
+        /* set up view model */
+        galleryViewModel = ViewModelProviders.of(this).get(GalleryViewModel.class);
+
+        /* set up google map fragment */
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-//        Bundle extras=getIntent().getExtras();
-//        if(extras!=null){
-//            mDataset=extras.getParcelableArrayList("Photos");
-//        }
+
+        /* set up UI */
         mPopupView = getLayoutInflater().inflate(R.layout.search_popup, null);
         searchPopup = new PopupWindow(mPopupView);
         mRecyclerView = (RecyclerView) findViewById(R.id.imgStrip);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this, 0, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new MapsAdapter(mDataset, this);
+        mAdapter = new MapsAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
-        queueData();
+
         mSearch = (Button) findViewById(R.id.imgSearch);
         mSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 title="%y%";
-                queueData();
 //                searchPopup.showAtLocation(findViewById(R.id.main_map_layout), Gravity.CENTER, 32, 32);
             }
         });
     }
 
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) throws SecurityException{
         mMap = googleMap;
-        if(mLocationPermissionGranted) {
-            mMap.setMyLocationEnabled(true);
-        }
-        mMap.animateCamera( CameraUpdateFactory.zoomTo( 5.0f ) );
+        mMap.setMyLocationEnabled(true);
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(2.0f));
         mMap.setInfoWindowAdapter(new MarkerInfoAdapter());
-        populateMap(mMap);
+        /* set up observers */
+        queueData();
     }
 
     @Override
     public void thumbnailClick(Photo photo){
         LatLng movLoc = new LatLng(photo.getImLat(), photo.getImLng());
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(movLoc,14));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(movLoc,21.0f));
     }
 
-    private void getLocationPermission() {
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
-        mLocationPermissionGranted = false;
-        switch (requestCode) {
-            case ACCESS_FINE_LOCATION: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
-                }
+    private void populateMap(List<Photo> photos) {
+        mMap.clear();
+        for(Photo photo : photos) {
+            /* only take photos with GPS info */
+            if (photo.getImHasCoordinates() == false) {
+                continue;
             }
-        }
-    }
-
-    private void reprocessData(ArrayList<Photo> dataset){
-        mAdapter.resetDataset(dataset);
-        mAdapter.notifyDataSetChanged();
-    }
-
-    private void populateMap(GoogleMap map) {
-        map.clear();
-        for(Photo location: mDataset) {
-            LatLng coords = new LatLng(location.getImLat(), location.getImLng());
-            Marker marker = mMap.addMarker(new MarkerOptions().position(coords).title(location.getImTitle()).icon(BitmapDescriptorFactory.fromPath(location.getImThumbPath())));
+            LatLng coords = new LatLng(photo.getImLat(), photo.getImLng());
+            /* create 50x50 marker icon */
+            Bitmap markerBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.gps_photo);
+            Bitmap scaledMarkerBitmap = Bitmap.createScaledBitmap(markerBitmap, 100, 100, true);
+            Marker marker = mMap.addMarker(new MarkerOptions()
+                    .position(coords)
+                    .title(photo.getImTitle())
+                    .icon(BitmapDescriptorFactory.fromBitmap(scaledMarkerBitmap)));
             HashMap<String, String> extraValues=new HashMap<>();
-            extraValues.put("ThumbnailPath", location.getImThumbPath());
-            extraValues.put("Description", location.getImDescription());
-            extraValues.put("Date", location.getImDateTime());
+            extraValues.put("ThumbnailPath", photo.getImThumbPath());
+            extraValues.put("Description", photo.getImDescription());
+            extraValues.put("Date", photo.getImDateTime());
             marker.setTag(extraValues);
         }
     }
 
     private void queueData() {
-        galleryViewModel=ViewModelProviders.of(this).get(GalleryViewModel.class);
-        galleryViewModel.refreshDatabase(getApplicationContext());
         galleryViewModel.getFilteredPhotos(title, description, date).observe(this, new Observer<List<Photo>>(){
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {
-                mDataset=(ArrayList<Photo>) photos;
-                System.out.println("onChanged: size " + photos.size());
-                reprocessData(mDataset);
-                if(mMap!=null){
-                    populateMap(mMap);
-                }
+                System.out.println("onChanged (getFilteredPhotos): size " + photos.size());
+                mAdapter.resetDataset(photos);
+                populateMap(photos);
             }});
     }
 }

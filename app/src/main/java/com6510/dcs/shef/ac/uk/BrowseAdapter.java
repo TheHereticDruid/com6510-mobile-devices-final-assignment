@@ -13,13 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,7 +107,14 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         @Override
         protected Bitmap doInBackground(HolderAndPosition... holderAndPositions) {
             holderAndPosition = holderAndPositions[0];
-            Photo photo = photos.get(holderAndPosition.position);
+            Photo photo;
+            try {
+                photo = photos.get(holderAndPosition.position);
+            } catch (IndexOutOfBoundsException e) {
+                /* photo got deleted in onChanged callback */
+                System.out.println("Error: photo does not exist anymore, not loading");
+                return null;
+            }
 
             File photoFile = new File(photo.getImPath());
             /* load file into memory */
@@ -140,7 +144,9 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            holderAndPosition.holder.photoItemView.setImageBitmap(bitmap);
+            if (bitmap != null) {
+                holderAndPosition.holder.photoItemView.setImageBitmap(bitmap);
+            }
         }
 
         void indexPhotoMetadata(File photoFile, ByteArrayInputStream photoStream, Photo photo) {
@@ -154,6 +160,9 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
                 if (exifInterface.getLatLong(latlng)) {
                     photo.setImLat(latlng[0]);
                     photo.setImLng(latlng[1]);
+                    photo.setImHasCoordinates(true);
+                } else {
+                    photo.setImHasCoordinates(false);
                 }
                 // Title
                 String val;

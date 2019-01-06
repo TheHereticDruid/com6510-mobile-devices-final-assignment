@@ -7,24 +7,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
-
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
 public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder> {
-    private ArrayList<Photo> mDataset;
+    private List<Photo> mDataset;
     WeakReference<Context> mContextWeakReference;
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
     public static class MapsViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
         public ImageView mImageView;
         public MapsViewHolder(ImageView imageView) {
             super(imageView);
@@ -32,18 +27,21 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
         }
     }
 
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public MapsAdapter(ArrayList<Photo> myDataset, Context context) {
-        mDataset = myDataset;
+    public MapsAdapter(Context context) {
         this.mContextWeakReference = new WeakReference<>(context);
     }
 
-    public void resetDataset(ArrayList<Photo> newData) {
-        mDataset.clear();
-        mDataset.addAll(newData);
+    public void resetDataset(List<Photo> newData) {
+        mDataset = new LinkedList<Photo>(newData);
+        /* remove photos without GPS data */
+        for (Photo photo : newData) {
+            if (photo.getImHasCoordinates() == false) {
+                mDataset.remove(photo);
+            }
+        }
+        notifyDataSetChanged();
     }
 
-    // Create new views (invoked by the layout manager)
     @Override
     public MapsAdapter.MapsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
@@ -51,13 +49,10 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
         return new MapsViewHolder(view);
     }
 
-    // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(MapsViewHolder holder, int position) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
         final Context context = mContextWeakReference.get();
-        final Photo photo=mDataset.get(position);
+        final Photo photo = mDataset.get(position);
         holder.mImageView.setImageBitmap(BitmapFactory.decodeFile(photo.getImThumbPath()));
         holder.mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,9 +62,11 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
         });
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
+        if (mDataset == null) {
+            return 0;
+        }
         return mDataset.size();
     }
 }
