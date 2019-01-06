@@ -8,7 +8,13 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -21,7 +27,14 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -49,6 +62,8 @@ public class BrowseActivity extends AppCompatActivity {
     private final int REQUEST_READ_EXTERNAL_STORAGE = 2987;
     private final int REQUEST_WRITE_EXTERNAL_STORAGE = 7829;
 
+    /* other */
+    private FusedLocationProviderClient mFusedLocationClient;
     private Activity activity;
 
     @Override
@@ -58,6 +73,8 @@ public class BrowseActivity extends AppCompatActivity {
         setContentView(R.layout.activity_browse);
 
         activity = this;
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         neededPermissions = Util.getDeclaredPermissions(getApplicationContext());
         grantedPermissions = new HashSet<>();
 
@@ -178,6 +195,10 @@ public class BrowseActivity extends AppCompatActivity {
                 EasyImage.openCamera(getActivity(), 0);
             }
         });
+        /* hide if device does not have a camera */
+        if (Util.checkCameraHardware(getApplicationContext()) == false) {
+            fabCamera.hide();
+        }
 
         /* initialize easyimage */
         Util.initEasyImage(getApplicationContext());
@@ -195,15 +216,48 @@ public class BrowseActivity extends AppCompatActivity {
 
             @Override
             public void onImagesPicked(List<File> imageFiles, EasyImage.ImageSource source, int type) {
-                System.out.println("Inserting manually picked files:");
-                for (File f : imageFiles) {
-                    System.out.println(f.getAbsolutePath());
-                    viewModel.insertPhoto(new Photo(f.getAbsolutePath(), Util.getNewThumbnailPath(getApplicationContext())));
-                }
-            }
+                /* create images directory if not created */
+                File imagesDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "TinyGallery");
+                imagesDirectory.mkdir();
 
-            @Override
-            public void onCanceled(EasyImage.ImageSource source, int type) {
+                System.out.println("Indexing camera/gallery files:");
+                for (File file : imageFiles) {
+                    /* copy file to tinygallery images directory */
+                    File newFile = new File(imagesDirectory, file.getName());
+                    try {
+                        Util.copyFile(file, newFile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    //photoPath = MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), "", "");
+                    System.out.println("Path: " + newFile.getAbsolutePath());
+                    final Photo photo = new Photo(newFile.getAbsolutePath(), Util.getNewThumbnailPath(getApplicationContext()));
+                    Util.readPhotoMetadata(photo);
+                    Util.makeThumbnail(photo.getImPath(), photo.getImThumbPath());
+                    /* store GPS location if photo taken from camera */
+                    if (source == EasyImage.ImageSource.CAMERA) {
+                        try {
+                            mFusedLocationClient.getLastLocation().addOnSuccessListener(activity, new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location location) {
+                                    if (location != null) {
+                                        System.out.println("Storing GPS data for camera image " + photo.getImPath());
+                                        System.out.println("Coordinates: " + location.getLatitude() + ", " + location.getLongitude());
+                                        photo.setImLat((float) location.getLatitude());
+                                        photo.setImLng((float) location.getLongitude());
+                                        photo.setImHasCoordinates(true);
+                                        viewModel.insertPhoto(photo);
+                                    }
+                                }
+                            });
+                        } catch (SecurityException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        /* just insert in db */
+                        viewModel.insertPhoto(photo);
+                    }
+                }
             }
         });
     }
