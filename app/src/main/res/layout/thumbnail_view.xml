@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
-    android:layout_width="24dp"
-    android:id="@+id/thumbnail"
-    android:paddingStart="1dp"
-    android:paddingEnd="1dp"/>
+    android:layout_height="@dimen/strip_thumbnail_size"
+    android:layout_width="@dimen/strip_thumbnail_size"
+    android:layout_margin="@dimen/strip_thumbnail_margin"
+    android:id="@+id/thumbnail"/>

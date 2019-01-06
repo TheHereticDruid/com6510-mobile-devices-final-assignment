@@ -1,13 +1,15 @@
 <resources>
     <string name="app_name">Gallery</string>
+    <string name="title_activity_browse">Browse</string>
     <string name="title_activity_show_image">Preview</string>
+    <string name="title_activity_map">Map</string>
+    <string name="title_activity_filter">Filter</string>
     <string name="reset_app">Clear app data</string>
-    <string name="grid_view">Grid View</string>
-    <string name="map_view">Map View</string>
     <string name="no_photos_available">Add some photos, will you?</string>
-    <string name="title_activity_maps">Map</string>
-    <string name="slide_show_image">Slide Show Image</string>
-    <string name="search_by_title">Search by Title</string>
-    <string name="reset_conditions">Submit an empty string to reset the filter</string>
-    <string name="search_button">Search</string>
+    <string name="filter_button_text">Filter</string>
+    <string name="reset_button_text">Reset</string>
+    <string name="filter_instructions">Enter search terms below. Set a field blank to exclude it from the filter.</string>
+    <string name="date_filter_hint">Date Filter</string>
+    <string name="title_filter_hint">Title Filter</string>
+    <string name="desc_filter_hint">Description Filter</string>
 </resources>

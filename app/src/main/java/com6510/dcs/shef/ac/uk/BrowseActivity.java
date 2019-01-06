@@ -59,12 +59,19 @@ public class BrowseActivity extends AppCompatActivity {
     /* permissions */
     private Set<String> neededPermissions;
     private Set<String> grantedPermissions;
-    private final int REQUEST_READ_EXTERNAL_STORAGE = 2987;
-    private final int REQUEST_WRITE_EXTERNAL_STORAGE = 7829;
 
     /* other */
     private FusedLocationProviderClient mFusedLocationClient;
     private Activity activity;
+
+    /* intents */
+    private final int INTENT_EASYIMAGE = 8665;
+    private final int INTENT_FILTER = 3543;
+
+    /* filter values */
+    private String filter_title;
+    private String filter_description;
+    private String filter_date;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -129,6 +136,11 @@ public class BrowseActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
         recyclerView.setHasFixedSize(true);
 
+        /* no filters initially */
+        filter_title = "";
+        filter_date = "";
+        filter_description = "";
+
         /* build viewmodel */
         viewModel = ViewModelProviders.of(this).get(GalleryViewModel.class);
 
@@ -140,40 +152,15 @@ public class BrowseActivity extends AppCompatActivity {
         /* start async task to scan phone for photos */
         viewModel.refreshDatabase(getApplicationContext());
 
-        /* start observing */
-        viewModel.getAllPhotos().observe(this, new Observer<List<Photo>>(){
-            @Override
-            public void onChanged(@Nullable final List<Photo> photos) {
-                photoDataset=(ArrayList<Photo>) photos;
-                System.out.println("onChanged: size " + photos.size());
-
-                /* show message if no photos found */
-                if (photos.size() == 0) {
-                    emptyView.setVisibility(View.VISIBLE);
-                    recyclerView.setVisibility(View.GONE);
-                } else {
-                    emptyView.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
-                }
-
-                /* sort photos by last modified time */
-                Collections.sort(photos, (new Comparator<Photo>() {
-                    @Override
-                    public int compare(Photo o1, Photo o2) {
-                        return (int)(o1.getImTimestamp() - o2.getImTimestamp());
-                    }
-                }));
-
-                /* update photos in the adapter */
-                adapter.setPhotosDiff(photos);
-            }});
+        /* set up observers */
+        setFilteredObserver(filter_title, filter_description, filter_date);
 
         /* floating button to manually add photos from gallery */
         FloatingActionButton fabGallery = (FloatingActionButton) findViewById(R.id.fab_gallery);
         fabGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                EasyImage.openGallery(getActivity(), 0);
+                EasyImage.openGallery(getActivity(), INTENT_EASYIMAGE);
             }
         });
 
@@ -192,7 +179,7 @@ public class BrowseActivity extends AppCompatActivity {
         fabCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                EasyImage.openCamera(getActivity(), 0);
+                EasyImage.openCamera(getActivity(), INTENT_EASYIMAGE);
             }
         });
         /* hide if device does not have a camera */
@@ -200,14 +187,24 @@ public class BrowseActivity extends AppCompatActivity {
             fabCamera.hide();
         }
 
+        /* floating buttion to filter photos */
+        FloatingActionButton fabFilter = (FloatingActionButton) findViewById(R.id.fab_filter);
+        fabFilter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent filterIntent = new Intent(getApplicationContext(), FilterActivity.class);
+                filterIntent.putExtra("TitleFilter", filter_title);
+                filterIntent.putExtra("DateFilter", filter_date);
+                filterIntent.putExtra("DescFilter", filter_description);
+                startActivityForResult(filterIntent, INTENT_FILTER);
+            }
+        });
+
         /* initialize easyimage */
         Util.initEasyImage(getApplicationContext());
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
+    protected void handleEasyImageResult(int requestCode, int resultCode, Intent data) {
         EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source, int type) {
@@ -262,6 +259,29 @@ public class BrowseActivity extends AppCompatActivity {
         });
     }
 
+    void handleFilterResult(int requestCode, int resultCode, Intent data) {
+        System.out.println("handleFilterResult called");
+        if(resultCode == Activity.RESULT_OK) {
+            Bundle extras = data.getExtras();
+            filter_title = extras.getString("TitleFilter", "");
+            filter_description = extras.getString("DescFilter", "");
+            filter_date = extras.getString("DateFilter", "");
+            /* update filter observer */
+            setFilteredObserver(filter_title, filter_description, filter_date);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == INTENT_EASYIMAGE) {
+            handleEasyImageResult(requestCode, resultCode, data);
+        } else if(requestCode == INTENT_FILTER) {
+            handleFilterResult(requestCode, resultCode, data);
+        }
+    }
+
     public Activity getActivity() {
         return this;
     }
@@ -280,5 +300,35 @@ public class BrowseActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setFilteredObserver(String title, String description, String date) {
+        viewModel.getFilteredPhotos("%"+title+"%", "%"+description+"%", "%"+date+"%")
+                .observe(this, new Observer<List<Photo>>(){
+            @Override
+            public void onChanged(@Nullable final List<Photo> photos) {
+                photoDataset=(ArrayList<Photo>) photos;
+                System.out.println("onChanged: size " + photos.size());
+
+                /* show message if no photos found */
+                if (photos.size() == 0) {
+                    emptyView.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                } else {
+                    emptyView.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                }
+
+                /* sort photos by last modified time */
+                Collections.sort(photos, (new Comparator<Photo>() {
+                    @Override
+                    public int compare(Photo o1, Photo o2) {
+                        return (int)(o2.getImTimestamp() - o1.getImTimestamp());
+                    }
+                }));
+
+                /* update photos in the adapter */
+                adapter.setPhotosDiff(photos);
+            }});
     }
 }

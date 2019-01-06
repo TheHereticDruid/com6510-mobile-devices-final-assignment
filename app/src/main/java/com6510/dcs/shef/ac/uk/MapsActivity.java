@@ -1,7 +1,9 @@
 package com6510.dcs.shef.ac.uk;
 
+import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
@@ -9,14 +11,13 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -45,13 +46,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private RecyclerView mRecyclerView;
     private MapsAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private Button mSearch;
-    private PopupWindow searchPopup;
-    private View mPopupView;
+    private FloatingActionButton mSearch;
 
-    private String title;
-    private String description;
-    private String date;
+    /* filter values */
+    private String filter_title;
+    private String filter_description;
+    private String filter_date;
 
     public class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
 
@@ -96,9 +96,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        title="%%";
-        description="%%";
-        date="%%";
+        /* no filters initially */
+        filter_title = "";
+        filter_date = "";
+        filter_description = "";
 
         /* set up view model */
         galleryViewModel = ViewModelProviders.of(this).get(GalleryViewModel.class);
@@ -108,8 +109,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         /* set up UI */
-        mPopupView = getLayoutInflater().inflate(R.layout.search_popup, null);
-        searchPopup = new PopupWindow(mPopupView);
         mRecyclerView = (RecyclerView) findViewById(R.id.imgStrip);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this, 0, false);
@@ -117,12 +116,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mAdapter = new MapsAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
 
-        mSearch = (Button) findViewById(R.id.imgSearch);
+        mSearch = (FloatingActionButton) findViewById(R.id.imgSearch);
         mSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                title="%y%";
-//                searchPopup.showAtLocation(findViewById(R.id.main_map_layout), Gravity.CENTER, 32, 32);
+                Intent filterIntent = new Intent(getApplicationContext(), FilterActivity.class);
+                filterIntent.putExtra("TitleFilter", filter_title);
+                filterIntent.putExtra("DateFilter", filter_date);
+                filterIntent.putExtra("DescFilter", filter_description);
+                startActivityForResult(filterIntent, 0);
             }
         });
     }
@@ -133,8 +135,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
         mMap.animateCamera(CameraUpdateFactory.zoomTo(2.0f));
         mMap.setInfoWindowAdapter(new MarkerInfoAdapter());
-        /* set up observers */
-        queueData();
+        /* set up observer */
+        setFilteredObserver(filter_title, filter_description, filter_date);
     }
 
     @Override
@@ -166,13 +168,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void queueData() {
-        galleryViewModel.getFilteredPhotos(title, description, date).observe(this, new Observer<List<Photo>>(){
+    private void setFilteredObserver(String title, String description, String date) {
+        galleryViewModel.getFilteredPhotos("%"+title+"%", "%"+description+"%", "%"+date+"%")
+                .observe(this, new Observer<List<Photo>>(){
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {
                 System.out.println("onChanged (getFilteredPhotos): size " + photos.size());
                 mAdapter.resetDataset(photos);
                 populateMap(photos);
             }});
+    }
+
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        super.onActivityResult(req, res, data);
+
+        System.out.println("Activity result called");
+        if(res == Activity.RESULT_OK) {
+            Bundle extras = data.getExtras();
+            filter_title = extras.getString("TitleFilter", "");
+            filter_date = extras.getString("DateFilter", "");
+            filter_description = extras.getString("DescFilter", "");
+            setFilteredObserver(filter_title, filter_description, filter_date);
+        }
     }
 }
