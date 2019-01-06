@@ -2,6 +2,7 @@ package com6510.dcs.shef.ac.uk;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
@@ -9,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
@@ -45,12 +47,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private GalleryViewModel galleryViewModel;
     private static final int ACCESS_FINE_LOCATION = 123;
+    private static final int FILTER_ACTIVITY_CODE = 1234;
     private RecyclerView mRecyclerView;
     private MapsAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<Photo> mDataset=new ArrayList<Photo>();
     private boolean mLocationPermissionGranted;
-    private Button mSearch;
+    private FloatingActionButton mSearch;
     private PopupWindow searchPopup;
     private View mPopupView;
     private String title;
@@ -99,9 +102,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        title="%%";
-        description="%%";
-        date="%%";
+        title="";
+        description="";
+        date="";
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         getLocationPermission();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -119,13 +122,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mAdapter = new MapsAdapter(mDataset, this);
         mRecyclerView.setAdapter(mAdapter);
         queueData();
-        mSearch = (Button) findViewById(R.id.imgSearch);
+        mSearch = (FloatingActionButton) findViewById(R.id.imgSearch);
         mSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                title="%y%";
-                queueData();
-//                searchPopup.showAtLocation(findViewById(R.id.main_map_layout), Gravity.CENTER, 32, 32);
+                Intent filterIntent = new Intent(getApplicationContext(), FilterActivity.class);
+                filterIntent.putExtra("TitleFilter", title);
+                filterIntent.putExtra("DateFilter", date);
+                filterIntent.putExtra("DescFilter", description);
+                startActivityForResult(filterIntent, FILTER_ACTIVITY_CODE);
             }
         });
     }
@@ -210,7 +215,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void queueData() {
         galleryViewModel=ViewModelProviders.of(this).get(GalleryViewModel.class);
         galleryViewModel.refreshDatabase(getApplicationContext());
-        galleryViewModel.getFilteredPhotos(title, description, date).observe(this, new Observer<List<Photo>>(){
+        galleryViewModel.getFilteredPhotos("%"+title+"%", "%"+description+"%", "%"+date+"%").observe(this, new Observer<List<Photo>>(){
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {
                 mDataset=(ArrayList<Photo>) photos;
@@ -220,5 +225,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     populateMap(mMap);
                 }
             }});
+    }
+
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        if(req==FILTER_ACTIVITY_CODE && res==RESULT_OK) {
+            Bundle extras=data.getExtras();
+            title=extras.getString("TitleFilter", "");
+            date=extras.getString("DateFilter", "");
+            description=extras.getString("DescFilter", "");
+            queueData();
+        }
     }
 }

@@ -10,4 +10,9 @@
     <string name="search_by_title">Search by Title</string>
     <string name="reset_conditions">Submit an empty string to reset the filter</string>
     <string name="search_button">Search</string>
+    <string name="filter_activity_header">Filter</string>
+    <string name="filter_instructions">Provide the search terms before. Set any field to an empty string to exclude it from the filter</string>
+    <string name="date_filter">Date Filter</string>
+    <string name="title_filter">Title Filter</string>
+    <string name="desc_filter">Description Filter</string>
 </resources>

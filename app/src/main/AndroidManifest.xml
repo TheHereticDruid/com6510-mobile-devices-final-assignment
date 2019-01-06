@@ -36,6 +36,10 @@
             android:label="@string/title_activity_maps"
             android:screenOrientation="landscape">
         </activity>
+        <activity
+            android:name="com6510.dcs.shef.ac.uk.FilterActivity"
+            android:label="@string/filter_activity_header">
+        </activity>
     </application>
 
 </manifest>
