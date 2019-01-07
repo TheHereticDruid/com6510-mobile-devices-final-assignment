@@ -74,10 +74,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             markerInfoThumbnail.setImageBitmap(((BitmapDrawable)drawable).getBitmap());
             TextView markerInfoTitle= ((TextView)markerInfoView.findViewById(R.id.marker_info_title));
             markerInfoTitle.setText(marker.getTitle());
-            markerInfoTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, markerInfoTitle.getTextSize()*1.5f);
+            markerInfoTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, markerInfoTitle.getTextSize()*1.2f);
             markerInfoTitle.setTypeface(null, Typeface.BOLD);
             TextView markerInfoDesc= ((TextView)markerInfoView.findViewById(R.id.marker_info_description));
-            markerInfoTitle.setText(extraValues.get("Description"));
+            if(extraValues.get("Description").isEmpty()) {
+                markerInfoDesc.setText("No Description set.");
+            }
+            else {
+                if(extraValues.get("Description").length()>90) {
+                    markerInfoDesc.setText(extraValues.get("Description").substring(0, 89)+"...");
+                }
+                else {
+                    markerInfoDesc.setText(extraValues.get("Description"));
+                }
+            }
             LatLng location=marker.getPosition();
             TextView markerInfoLat= ((TextView)markerInfoView.findViewById(R.id.marker_info_lat));
             markerInfoLat.setText(String.format("Latitude: %.6f", location.latitude));
