@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Set;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
+import pl.aprilapps.easyphotopicker.Constants;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
@@ -275,7 +276,7 @@ public class BrowseActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == INTENT_EASYIMAGE) {
+        if (requestCode == Constants.RequestCodes.PICK_PICTURE_FROM_GALLERY || requestCode == Constants.RequestCodes.TAKE_PICTURE) {
             handleEasyImageResult(requestCode, resultCode, data);
         } else if(requestCode == INTENT_FILTER) {
             handleFilterResult(requestCode, resultCode, data);
