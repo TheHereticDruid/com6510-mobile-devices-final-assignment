@@ -25,8 +25,7 @@
         </meta-data>
         <activity
             android:name="com6510.dcs.shef.ac.uk.BrowseActivity"
-            android:theme="@style/splashScreenTheme"
-            android:label="@string/title_activity_browse">
+            android:theme="@style/splashScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

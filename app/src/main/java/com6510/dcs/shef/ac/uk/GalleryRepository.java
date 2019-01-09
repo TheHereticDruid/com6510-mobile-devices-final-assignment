@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.provider.MediaStore;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,25 +22,18 @@ public class GalleryRepository extends ViewModel {
     private LiveData<List<Photo>> photos;
     private LiveData<List<Photo>> filteredPhotos;
     private PhotoRoomDatabase db;
-    private String title;
-    private String description;
-    private String date;
 
     public GalleryRepository(Application application) {
         db = PhotoRoomDatabase.getDatabase(application);
         dbDao = db.photoDao();
-        title="%%";
-        description="%%";
-        date="%%";
         /* live photos from db */
         photos = dbDao.getAllPhotos();
-        filteredPhotos = dbDao.getFilteredPhotos(title, description, date);
     }
 
     /* ------------ DB wrappers ------------- */
 
     public Photo getPhoto(String path) {
-        Photo photo = new Photo(path, "");
+        Photo photo = new Photo(path, "", 0, "", "", 0, 0, false, "");
         new GetAsyncTask(dbDao).execute(photo);
         return photo;
     }
@@ -57,11 +51,7 @@ public class GalleryRepository extends ViewModel {
     }
 
     public LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date) {
-        this.title=title;
-        this.description=description;
-        this.date=date;
-        filteredPhotos = dbDao.getFilteredPhotos(title, description, date);
-        return filteredPhotos;
+        return dbDao.getFilteredPhotos(title, description, date);
     }
 
     public List<Photo> getAllPhotosSync() {
@@ -198,51 +188,35 @@ public class GalleryRepository extends ViewModel {
             }
             */
 
-            List<Photo> photosToInsert = new LinkedList<Photo>();
+            List<Photo> photosToInsert = new ArrayList<>();
 
             /* read files, create thumbnails and store in db */
             for (String path : pathsToBeIndexed) {
+                File file = new File(path);
                 /* photo already exists in db */
                 if (db_photos_map.containsKey(path)) {
                     //System.out.println("Photo already exists in db: " + path);
                 } else {
                     /* create Photo object to insert in db */
-                    Photo photo = new Photo(path, Util.getNewThumbnailPath(context));
-                    /* set timestamp so that order of photos remains invariant as they appear on grid */
-                    photo.setImTimestamp(new File(path).lastModified());
+                    Photo photo = new Photo(
+                            path,
+                            Util.getNewThumbnailPath(context),
+                            file.lastModified(),
+                            file.getName(),
+                            "Add a description!",
+                            0,
+                            0,
+                            false,
+                            "");
+                    /* timestamp is set so that order of photos remains invariant as they appear on grid */
                     photosToInsert.add(photo);
                 }
             }
 
             /* insert all photos at once, resulting in only one onChanged callback */
+            System.out.println("Inserting " + photosToInsert.size() + " scanned photos in db");
             mDao.insertAllPhotos(photosToInsert);
             return null;
         }
-    }
-
-    public static void indexFile(Context context, PhotoRoomDatabase db, String sourcePath) {
-        PhotoDao dao = db.photoDao();
-        System.out.println("Putting into db: " + sourcePath);
-
-        /* generate thumbnail path to store in db, but don't create thumbnail */
-
-        //Bitmap original_bitmap = BitmapFactory.decodeFile(sourcePath.getAbsolutePath());
-        //Bitmap thumbnail_bitmap = Bitmap.createScaledBitmap(original_bitmap, 100, 100, true);
-        /*
-        try (FileOutputStream out = new FileOutputStream(thumbnail_file.getAbsolutePath())) {
-            thumbnail_bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        */
-        /* create Photo object to insert in db */
-        Photo photo = new Photo(sourcePath, Util.getNewThumbnailPath(context));
-        photo.setImTimestamp(0);
-
-        /* delete old copy from db */
-        //dao.deletePhoto(path);
-
-        /* insert in db */
-        dao.insertPhoto(photo);
     }
 }

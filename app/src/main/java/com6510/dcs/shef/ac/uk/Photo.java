@@ -36,7 +36,7 @@ public class Photo implements Parcelable {
     float imLng;
 
     @ColumnInfo(name = "im_has_coordinates")
-    boolean hasCoordinates;
+    boolean imHasCoordinates;
 
     @ColumnInfo(name = "im_datetime")
     private String imDateTime;
@@ -45,9 +45,24 @@ public class Photo implements Parcelable {
     private Bitmap imThumbnail;
 
     /* ------------ constructors -------------- */
-    public Photo(String imPath, String imThumbPath) {
+    public Photo(String imPath,
+                 String imThumbPath,
+                 long imTimestamp,
+                 String imTitle,
+                 String imDescription,
+                 float imLat,
+                 float imLng,
+                 boolean imHasCoordinates,
+                 String imDateTime) {
         this.imPath = imPath;
         this.imThumbPath = imThumbPath;
+        this.imTimestamp = imTimestamp;
+        this.imTitle = imTitle;
+        this.imDescription = imDescription;
+        this.imLat = imLat;
+        this.imLng = imLng;
+        this.imHasCoordinates = imHasCoordinates;
+        this.imDateTime = imDateTime;
     }
 
     public Photo(Parcel in) {
@@ -133,11 +148,11 @@ public class Photo implements Parcelable {
     }
 
     public boolean getImHasCoordinates() {
-        return hasCoordinates;
+        return imHasCoordinates;
     }
 
     public void setImHasCoordinates(boolean hasCoordinates) {
-        this.hasCoordinates = hasCoordinates;
+        this.imHasCoordinates = hasCoordinates;
     }
 
     /* --------------------- parcels -------------------- */

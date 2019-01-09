@@ -12,4 +12,5 @@
     <string name="date_filter_hint">Date Filter</string>
     <string name="title_filter_hint">Title Filter</string>
     <string name="desc_filter_hint">Description Filter</string>
+    <string name="edit_metadata">Edit metadata</string>
 </resources>

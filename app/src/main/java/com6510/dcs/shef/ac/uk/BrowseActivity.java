@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -154,7 +155,7 @@ public class BrowseActivity extends AppCompatActivity {
         viewModel.refreshDatabase(getApplicationContext());
 
         /* set up observers */
-        setFilteredObserver(filter_title, filter_description, filter_date);
+        setFilteredObserver("", "", "");
 
         /* floating button to manually add photos from gallery */
         FloatingActionButton fabGallery = (FloatingActionButton) findViewById(R.id.fab_gallery);
@@ -162,16 +163,6 @@ public class BrowseActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 EasyImage.openGallery(getActivity(), INTENT_EASYIMAGE);
-            }
-        });
-
-        /* floating button to open map view */
-        FloatingActionButton fabMap = (FloatingActionButton) findViewById(R.id.fab_map);
-        fabMap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(v.getContext(), MapsActivity.class);
-                startActivity(intent);
             }
         });
 
@@ -227,9 +218,20 @@ public class BrowseActivity extends AppCompatActivity {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    //photoPath = MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), "", "");
+                    /* notify mediascanner */
+                    MediaScannerConnection.scanFile(getApplicationContext(), new String[]{newFile.getAbsolutePath()}, null, null);
+
                     System.out.println("Path: " + newFile.getAbsolutePath());
-                    final Photo photo = new Photo(newFile.getAbsolutePath(), Util.getNewThumbnailPath(getApplicationContext()));
+                    final Photo photo = new Photo(
+                            newFile.getAbsolutePath(),
+                            Util.getNewThumbnailPath(getApplicationContext()),
+                            file.lastModified(),
+                            file.getName(),
+                            "Add a description!",
+                            0,
+                            0,
+                            false,
+                            "");
                     Util.readPhotoMetadata(photo);
                     Util.makeThumbnail(photo.getImPath(), photo.getImThumbPath());
                     /* store GPS location if photo taken from camera */
@@ -290,7 +292,7 @@ public class BrowseActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -299,11 +301,16 @@ public class BrowseActivity extends AppCompatActivity {
         if (id == R.id.reset_app) {
             ((ActivityManager)getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE)).clearApplicationUserData();
             return true;
+        } else if (id == R.id.map_view) {
+            Intent intent = new Intent(this, MapsActivity.class);
+            startActivity(intent);
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
     private void setFilteredObserver(String title, String description, String date) {
+        System.out.println("Setting observer with filters title=" + title + ", description=" + description + ", date=" + date);
         viewModel.getFilteredPhotos("%"+title+"%", "%"+description+"%", "%"+date+"%")
                 .observe(this, new Observer<List<Photo>>(){
             @Override
