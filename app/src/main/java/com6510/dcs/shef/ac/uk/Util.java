@@ -179,6 +179,10 @@ public class Util {
         /* generate 100x100 thumbnail */
         System.out.println("Building thumbnail for file " + photoPath);
         Bitmap originalBitmap = BitmapFactory.decodeFile(photoPath);
+        if (originalBitmap == null) {
+            System.out.println("Error loading file " + photoPath + ", cannot build thumbnail");
+            return null;
+        }
         Bitmap thumbnailBitmap = Bitmap.createScaledBitmap(originalBitmap, 100, 100, true);
         try (FileOutputStream out = new FileOutputStream(thumbPath)) {
             thumbnailBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);

@@ -1,5 +1,7 @@
 package com6510.dcs.shef.ac.uk;
 
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -11,6 +13,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
@@ -33,6 +37,20 @@ public class ShowPhotoActivity extends AppCompatActivity {
         bitmap = BitmapFactory.decodeFile(photo.getImPath());
         image.setImageBitmap(bitmap);
 
+        /* hide action bar on click to look nice */
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            @SuppressLint("RestrictedApi") // supress stupid warning (bug)
+            public void onClick(View v) {
+                android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+                actionBar.setShowHideAnimationEnabled(false);
+                if (actionBar.isShowing()) {
+                    actionBar.hide();
+                } else {
+                    actionBar.show();
+                }
+            }
+        });
     }
 
     @Override

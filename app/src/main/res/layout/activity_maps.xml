@@ -31,7 +31,9 @@
             android:id="@+id/imgStrip"
             android:layout_width="match_parent"
             android:layout_height="@dimen/strip_height"
-            android:layout_margin="@dimen/strip_thumbnail_margin"
+            android:layout_marginBottom="@dimen/strip_thumbnail_margin_half"
+            android:layout_marginStart="@dimen/strip_thumbnail_margin_half"
+            android:layout_marginEnd="@dimen/strip_thumbnail_margin_half"
             android:layout_alignParentBottom="true"/>
     </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

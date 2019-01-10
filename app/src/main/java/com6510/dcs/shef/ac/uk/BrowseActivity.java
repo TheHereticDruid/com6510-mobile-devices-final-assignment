@@ -7,7 +7,9 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ConfigurationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
@@ -134,8 +136,11 @@ public class BrowseActivity extends AppCompatActivity {
         /* set up grid */
         recyclerView = findViewById(R.id.grid_recycler_view);
         emptyView = findViewById(R.id.empty_view);
-        int numberOfColumns = 4;
-        recyclerView.setLayoutManager(new GridLayoutManager(this, numberOfColumns));
+        if (activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            recyclerView.setLayoutManager(new GridLayoutManager(this, getResources().getInteger(R.integer.browse_columns_port)));
+        } else {
+            recyclerView.setLayoutManager(new GridLayoutManager(this, getResources().getInteger(R.integer.browse_columns_land)));
+        }
         recyclerView.setHasFixedSize(true);
 
         /* no filters initially */
@@ -158,7 +163,7 @@ public class BrowseActivity extends AppCompatActivity {
         setFilteredObserver("", "", "");
 
         /* floating button to manually add photos from gallery */
-        FloatingActionButton fabGallery = (FloatingActionButton) findViewById(R.id.fab_gallery);
+        final FloatingActionButton fabGallery = (FloatingActionButton) findViewById(R.id.fab_gallery);
         fabGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -167,7 +172,7 @@ public class BrowseActivity extends AppCompatActivity {
         });
 
         /* floating button to take photos from camera */
-        FloatingActionButton fabCamera = (FloatingActionButton) findViewById(R.id.fab_camera);
+        final FloatingActionButton fabCamera = (FloatingActionButton) findViewById(R.id.fab_camera);
         fabCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -180,7 +185,7 @@ public class BrowseActivity extends AppCompatActivity {
         }
 
         /* floating buttion to filter photos */
-        FloatingActionButton fabFilter = (FloatingActionButton) findViewById(R.id.fab_filter);
+        final FloatingActionButton fabFilter = (FloatingActionButton) findViewById(R.id.fab_filter);
         fabFilter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -189,6 +194,24 @@ public class BrowseActivity extends AppCompatActivity {
                 filterIntent.putExtra("DateFilter", filter_date);
                 filterIntent.putExtra("DescFilter", filter_description);
                 startActivityForResult(filterIntent, INTENT_FILTER);
+            }
+        });
+
+        /* auto hide floating buttons */
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if (dy > 0) {
+                    fabCamera.hide();
+                    fabFilter.hide();
+                    fabGallery.hide();
+                } else if (dy < 0) {
+                    fabCamera.show();
+                    fabFilter.show();
+                    fabGallery.show();
+                }
             }
         });
 
@@ -331,7 +354,10 @@ public class BrowseActivity extends AppCompatActivity {
                 Collections.sort(photos, (new Comparator<Photo>() {
                     @Override
                     public int compare(Photo o1, Photo o2) {
-                        return (int)(o2.getImTimestamp() - o1.getImTimestamp());
+                        if (o1.getImTimestamp() == o2.getImTimestamp()) {
+                            return 0;
+                        }
+                        return o2.getImTimestamp() < o1.getImTimestamp() ? -1 : 1;
                     }
                 }));
 

@@ -133,7 +133,11 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
             }
 
             /* cache thumbnail inside adapter to avoid reading from disk again */
-            photo.setImThumbnail(thumbnailBitmap);
+            if (thumbnailBitmap == null) {
+                photo.setImThumbnail(emptyThumbnail);
+            } else {
+                photo.setImThumbnail(thumbnailBitmap);
+            }
             return thumbnailBitmap;
         }
 

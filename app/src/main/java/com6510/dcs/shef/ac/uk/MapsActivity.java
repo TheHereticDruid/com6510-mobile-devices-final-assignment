@@ -29,6 +29,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -184,6 +186,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {
                 System.out.println("onChanged (getFilteredPhotos): size " + photos.size());
+
+                /* sort photos by last modified time */
+                Collections.sort(photos, (new Comparator<Photo>() {
+                    @Override
+                    public int compare(Photo o1, Photo o2) {
+                        if (o1.getImTimestamp() == o2.getImTimestamp()) {
+                            return 0;
+                        }
+                        return o2.getImTimestamp() < o1.getImTimestamp() ? -1 : 1;
+                    }
+                }));
+
                 mAdapter.resetDataset(photos);
                 populateMap(photos);
             }});
