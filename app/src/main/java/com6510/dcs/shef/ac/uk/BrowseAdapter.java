@@ -22,6 +22,7 @@ import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
+// merge test
 public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewHolder> {
 
     class ImageViewHolder extends RecyclerView.ViewHolder  {
