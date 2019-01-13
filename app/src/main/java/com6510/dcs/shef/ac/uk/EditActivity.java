@@ -16,6 +16,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -91,8 +92,15 @@ public class EditActivity extends AppCompatActivity {
                 photo.setImDateTime(dateEdit.getText().toString());
                 photo.setImTitle(titleEdit.getText().toString());
                 photo.setImDescription(descEdit.getText().toString());
-                photo.setImLat(Float.parseFloat(latEdit.getText().toString()));
-                photo.setImLng(Float.parseFloat(lngEdit.getText().toString()));
+                if (latEdit.getText().toString().length() > 0 || lngEdit.getText().toString().length() > 0) {
+                    try {
+                        photo.setImLat(Float.parseFloat(latEdit.getText().toString()));
+                        photo.setImLng(Float.parseFloat(lngEdit.getText().toString()));
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(getApplicationContext(), "Invalid coordinates!", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                }
                 resultIntent.putExtra("Photo", photo);
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();

@@ -261,22 +261,28 @@ public class BrowseActivity extends AppCompatActivity {
                     /* store GPS location if photo taken from camera */
                     if (source == EasyImage.ImageSource.CAMERA) {
                         try {
-                            mFusedLocationClient.getLastLocation().addOnSuccessListener(activity, new OnSuccessListener<Location>() {
-                                @Override
-                                public void onSuccess(Location location) {
-                                    if (location != null) {
-                                        System.out.println("Storing GPS data for camera image " + photo.getImPath());
-                                        photo.setImLat((float) location.getLatitude());
-                                        photo.setImLng((float) location.getLongitude());
-                                        photo.setImHasCoordinates(true);
-                                        System.out.println("Coordinates: " + photo.getImLat() + ", " + photo.getImLng());
+                            if (Util.isEmulator()) {
+                                photo.setImLat(53.381028f);
+                                photo.setImLng(-1.480318f);
+                                photo.setImHasCoordinates(true);
+                            } else {
+                                mFusedLocationClient.getLastLocation().addOnSuccessListener(activity, new OnSuccessListener<Location>() {
+                                    @Override
+                                    public void onSuccess(Location location) {
+                                        if (location != null) {
+                                            System.out.println("Storing GPS data for camera image " + photo.getImPath());
+                                            photo.setImLat((float) location.getLatitude());
+                                            photo.setImLng((float) location.getLongitude());
+                                            photo.setImHasCoordinates(true);
+                                            System.out.println("Coordinates: " + photo.getImLat() + ", " + photo.getImLng());
+                                        }
+                                        /* edit metadata before saving image */
+                                        Intent editIntent = new Intent(getApplicationContext(), EditActivity.class);
+                                        editIntent.putExtra("Photo", photo);
+                                        startActivityForResult(editIntent, INTENT_EDIT);
                                     }
-                                    /* edit metadata before saving image */
-                                    Intent editIntent = new Intent(getApplicationContext(), EditActivity.class);
-                                    editIntent.putExtra("Photo", photo);
-                                    startActivityForResult(editIntent, INTENT_EDIT);
-                                }
-                            });
+                                });
+                            }
                         } catch (SecurityException e) {
                             e.printStackTrace();
                         }

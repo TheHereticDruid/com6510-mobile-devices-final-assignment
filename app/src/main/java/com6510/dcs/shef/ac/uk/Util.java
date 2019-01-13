@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 
@@ -93,21 +94,7 @@ public class Util {
         return thumbnailFile.getAbsolutePath();
     }
 
-    public static byte[] fileToByteArray(String path) {
-        File file = new File(path);
-        byte[] bytes = new byte[(int)file.length()];
-        try {
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-            buf.read(bytes, 0, bytes.length);
-            buf.close();
-        } catch (IOException e) {
-            System.err.println("Could not read photo in memory: " + file.getAbsolutePath());
-            e.printStackTrace();
-        }
-        return bytes;
-    }
-
-    /* Check if this device has a camera https://developer.android.com/guide/topics/media/camera#java */
+    /* https://developer.android.com/guide/topics/media/camera#java */
     public static boolean checkCameraHardware(Context context) {
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
             // this device has a camera
@@ -258,5 +245,17 @@ public class Util {
                 destination.close();
             }
         }
+    }
+
+    /* https://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in-the-emulator */
+    public static boolean isEmulator() {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk".equals(Build.PRODUCT);
     }
 }

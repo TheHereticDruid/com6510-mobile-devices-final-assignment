@@ -1,80 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <TextView
+<TextView
         android:id="@+id/edit_instructions"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/edit_instructions"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_margin="10dp"
+        android:text="@string/edit_instructions" />
 
     <EditText
         android:id="@+id/edit_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
+        android:layout_marginHorizontal="10dp"
         android:hint="@string/edit_date"
         android:clickable="true"
         android:cursorVisible="false"
         android:focusable="false"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_below="@id/edit_instructions" />
 
     <EditText
         android:id="@+id/edit_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="124dp"
+        android:layout_marginHorizontal="10dp"
         android:hint="@string/edit_title"
         android:inputType="text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_below="@id/edit_date" />
 
     <EditText
         android:id="@+id/edit_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="168dp"
+        android:layout_marginHorizontal="10dp"
         android:hint="@string/edit_description"
         android:inputType="text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_below="@id/edit_title" />
 
     <EditText
         android:id="@+id/edit_latitude"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="212dp"
+        android:layout_marginHorizontal="10dp"
         android:hint="@string/edit_latitude"
         android:inputType="numberDecimal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_below="@id/edit_description" />
 
     <EditText
         android:id="@+id/edit_longitude"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="256dp"
+        android:layout_marginHorizontal="10dp"
         android:hint="@string/edit_longitude"
         android:inputType="numberDecimal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_below="@id/edit_latitude" />
 
-    <Button
+    <Button style="@style/Widget.AppCompat.Button.Borderless"
         android:id="@+id/edit_submit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="300dp"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
         android:text="@string/edit_button_text"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorAccent" />
 
-</android.support.constraint.ConstraintLayout>
+</RelativeLayout>

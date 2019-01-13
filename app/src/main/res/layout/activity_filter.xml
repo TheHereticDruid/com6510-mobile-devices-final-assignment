@@ -11,23 +11,25 @@
         android:id="@+id/filterInstructions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="10dp"
         android:text="@string/filter_instructions" />
 
     <EditText
         android:id="@+id/dateFilter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
         android:hint="@string/date_filter_hint"
         android:clickable="true"
         android:cursorVisible="false"
         android:focusable="false"
-        android:layout_below="@id/filterInstructions"
-        android:layout_marginTop="@dimen/fab_margin"/>
+        android:layout_below="@id/filterInstructions" />
 
     <EditText
         android:id="@+id/titleFilter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
         android:hint="@string/title_filter_hint"
         android:inputType="text"
         android:layout_below="@id/dateFilter"/>
@@ -36,23 +38,27 @@
         android:id="@+id/descFilter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
         android:hint="@string/desc_filter_hint"
         android:inputType="text"
         android:layout_below="@id/titleFilter"/>
 
-    <Button style="@style/Widget.AppCompat.Button"
+    <Button style="@style/Widget.AppCompat.Button.Borderless"
         android:id="@+id/resetButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
         android:text="@string/reset_button_text"
-        android:layout_below="@id/descFilter"/>
+        android:layout_above="@+id/filterButton"
+        android:background="@color/common_google_signin_btn_text_light_disabled"
+        />
 
-    <Button style="@style/Widget.AppCompat.Button.Colored"
+    <Button style="@style/Widget.AppCompat.Button.Borderless"
         android:id="@+id/filterButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
         android:text="@string/filter_button_text"
-        android:layout_below="@id/descFilter"
-        android:layout_toRightOf="@id/resetButton"/>
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorAccent"
+        />
 
 </RelativeLayout>
