@@ -21,11 +21,14 @@ import java.util.Calendar;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
-public class FilterActivity extends AppCompatActivity {
+public class EditActivity extends AppCompatActivity {
 
-    private EditText dateFilter;
-    private EditText titleFilter;
-    private EditText descFilter;
+    private EditText titleEdit;
+    private EditText dateEdit;
+    private EditText descEdit;
+    private EditText latEdit;
+    private EditText lngEdit;
+    private Photo photo;
 
     public static class DatePickerDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
@@ -47,36 +50,44 @@ public class FilterActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_filter);
+        setContentView(R.layout.activity_edit_photo);
 
-        TextView instructions = (TextView) findViewById(R.id.filterInstructions);
+        TextView instructions = (TextView) findViewById(R.id.edit_instructions);
         instructions.setTextSize(TypedValue.COMPLEX_UNIT_PX, instructions.getTextSize() * 1.5f);
-        dateFilter = (EditText) findViewById(R.id.dateFilter);
-        titleFilter = (EditText) findViewById(R.id.titleFilter);
-        descFilter = (EditText) findViewById(R.id.descFilter);
+        dateEdit = (EditText) findViewById(R.id.edit_date);
+        titleEdit = (EditText) findViewById(R.id.edit_title);
+        descEdit = (EditText) findViewById(R.id.edit_description);
+        latEdit = (EditText) findViewById(R.id.edit_latitude);
+        lngEdit = (EditText) findViewById(R.id.edit_longitude);
 
         Bundle sourceExtras = getIntent().getExtras();
-        dateFilter.setText(sourceExtras.getString("DateFilter"));
-        titleFilter.setText(sourceExtras.getString("TitleFilter"));
-        descFilter.setText(sourceExtras.getString("DescFilter"));
+        photo=(Photo) sourceExtras.get("Photo");
+        dateEdit.setText(photo.getImDateTime());
+        titleEdit.setText(photo.getImTitle());
+        descEdit.setText(photo.getImDescription());
+        latEdit.setText(Float.toString(photo.getImLat()));
+        lngEdit.setText(Float.toString(photo.getImLng()));
 
-        ImageView dateFilterPicker=(ImageView) findViewById(R.id.dateFilterPicker);
-        dateFilterPicker.setOnClickListener(new View.OnClickListener() {
+        ImageView dateEditPicker=(ImageView) findViewById(R.id.dateEditPicker);
+        dateEditPicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DialogFragment newFragment = new DatePickerDialogFragment();
+                DialogFragment newFragment = new FilterActivity.DatePickerDialogFragment();
                 newFragment.show(getSupportFragmentManager(), "datePicker");
             }
         });
 
-        Button filterButton = (Button) findViewById(R.id.filterButton);
-        filterButton.setOnClickListener(new View.OnClickListener() {
+        Button editButton = (Button) findViewById(R.id.edit_submit);
+        editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent resultIntent = new Intent();
-                resultIntent.putExtra("DateFilter", dateFilter.getText().toString());
-                resultIntent.putExtra("TitleFilter", titleFilter.getText().toString());
-                resultIntent.putExtra("DescFilter", descFilter.getText().toString());
+                photo.setImDateTime(dateEdit.getText().toString());
+                photo.setImTitle(titleEdit.getText().toString());
+                photo.setImDescription(descEdit.getText().toString());
+                photo.setImLat(Float.parseFloat(latEdit.getText().toString()));
+                photo.setImLng(Float.parseFloat(lngEdit.getText().toString()));
+                resultIntent.putExtra("Photo", photo);
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
             }

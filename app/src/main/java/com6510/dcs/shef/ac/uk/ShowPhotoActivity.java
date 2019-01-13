@@ -2,8 +2,10 @@ package com6510.dcs.shef.ac.uk;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,6 +26,10 @@ public class ShowPhotoActivity extends AppCompatActivity {
     private Photo photo;
     private Bitmap bitmap;
 
+    private final int INTENT_EDIT = 3838;
+
+    private GalleryViewModel viewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -32,6 +38,8 @@ public class ShowPhotoActivity extends AppCompatActivity {
 
         Bundle data = getIntent().getExtras();
         photo = (Photo) data.getParcelable("photo");
+
+        viewModel= ViewModelProviders.of(this).get(GalleryViewModel.class);
 
         ImageView image = findViewById(R.id.image_preview);
         bitmap = BitmapFactory.decodeFile(photo.getImPath());
@@ -63,7 +71,9 @@ public class ShowPhotoActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.edit_metadata) {
-            return true;
+            Intent editIntent=new Intent(getApplicationContext(), EditActivity.class);
+            editIntent.putExtra("Photo", photo);
+            startActivityForResult(editIntent, INTENT_EDIT);
         } else if (id == R.id.show_metadata) {
             /* build info string */
             String message = "Title: " + photo.getImTitle() + "\n"
@@ -84,5 +94,14 @@ public class ShowPhotoActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == Activity.RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Photo newPhoto=(Photo) extras.get("Photo");
+            viewModel.insertPhoto(newPhoto);
+        }
     }
 }

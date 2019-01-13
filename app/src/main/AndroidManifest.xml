@@ -43,6 +43,10 @@
             android:name="com6510.dcs.shef.ac.uk.FilterActivity"
             android:label="@string/title_activity_filter">
         </activity>
+        <activity
+            android:name="com6510.dcs.shef.ac.uk.EditActivity"
+            android:label="@string/title_activity_edit">
+        </activity>
     </application>
 
 </manifest>

@@ -4,6 +4,7 @@
     <string name="title_activity_show_image">Preview</string>
     <string name="title_activity_map">Map</string>
     <string name="title_activity_filter">Filter</string>
+    <string name="title_activity_edit">Edit</string>
     <string name="reset_app">Clear app data</string>
     <string name="no_photos_available">Add some photos, will you?</string>
     <string name="filter_button_text">Filter</string>
@@ -13,4 +14,11 @@
     <string name="title_filter_hint">Title Filter</string>
     <string name="desc_filter_hint">Description Filter</string>
     <string name="edit_metadata">Edit metadata</string>
+    <string name="edit_instructions">Edit Title and Description of the image below</string>
+    <string name="edit_date">Edit Date</string>
+    <string name="edit_title">Edit Title</string>
+    <string name="edit_description">Edit Description</string>
+    <string name="edit_latitude">Edit Latitude</string>
+    <string name="edit_longitude">Edit Longitude</string>
+    <string name="edit_button_text">Edit</string>
 </resources>

@@ -71,6 +71,7 @@ public class BrowseActivity extends AppCompatActivity {
     /* intents */
     private final int INTENT_EASYIMAGE = 8665;
     private final int INTENT_FILTER = 3543;
+    private final int INTENT_EDIT = 3838;
 
     /* filter values */
     private String filter_title;
@@ -269,10 +270,12 @@ public class BrowseActivity extends AppCompatActivity {
                                         photo.setImLat((float) location.getLatitude());
                                         photo.setImLng((float) location.getLongitude());
                                         photo.setImHasCoordinates(true);
-                                        viewModel.insertPhoto(photo);
                                     }
                                 }
                             });
+                            Intent editIntent=new Intent(getApplicationContext(), EditActivity.class);
+                            editIntent.putExtra("Photo", photo);
+                            startActivityForResult(editIntent, INTENT_EDIT);
                         } catch (SecurityException e) {
                             e.printStackTrace();
                         }
@@ -297,6 +300,15 @@ public class BrowseActivity extends AppCompatActivity {
         }
     }
 
+    void handleEditResult(int requestCode, int resultCode, Intent data) {
+        System.out.println("handleEditResult called");
+        if(resultCode == Activity.RESULT_OK) {
+            Bundle extras = data.getExtras();
+            Photo newPhoto=(Photo) extras.get("Photo");
+            viewModel.insertPhoto(newPhoto);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -305,6 +317,8 @@ public class BrowseActivity extends AppCompatActivity {
             handleEasyImageResult(requestCode, resultCode, data);
         } else if(requestCode == INTENT_FILTER) {
             handleFilterResult(requestCode, resultCode, data);
+        } else if(requestCode == INTENT_EDIT) {
+            handleEditResult(requestCode, resultCode, data);
         }
     }
 
