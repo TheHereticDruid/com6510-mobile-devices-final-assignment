@@ -2,24 +2,17 @@ package com6510.dcs.shef.ac.uk;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
@@ -29,6 +22,9 @@ public class FilterActivity extends AppCompatActivity {
     private EditText dateFilter;
     private EditText titleFilter;
     private EditText descFilter;
+    private EditText artistFilter;
+    private EditText makeFilter;
+    private EditText modelFilter;
 
     final Calendar calendar = Calendar.getInstance();
 
@@ -47,11 +43,17 @@ public class FilterActivity extends AppCompatActivity {
         dateFilter = (EditText) findViewById(R.id.dateFilter);
         titleFilter = (EditText) findViewById(R.id.titleFilter);
         descFilter = (EditText) findViewById(R.id.descFilter);
+        artistFilter = (EditText) findViewById(R.id.artistFilter);
+        makeFilter = (EditText) findViewById(R.id.makeFilter);
+        modelFilter = (EditText) findViewById(R.id.modelFilter);
 
         Bundle sourceExtras = getIntent().getExtras();
         dateFilter.setText(sourceExtras.getString("DateFilter"));
         titleFilter.setText(sourceExtras.getString("TitleFilter"));
         descFilter.setText(sourceExtras.getString("DescFilter"));
+        artistFilter.setText(sourceExtras.getString("ArtistFilter"));
+        makeFilter.setText(sourceExtras.getString("MakeFilter"));
+        modelFilter.setText(sourceExtras.getString("ModelFilter"));
 
         /* set date picker to popup on clicking text view */
         final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
@@ -83,6 +85,9 @@ public class FilterActivity extends AppCompatActivity {
                 resultIntent.putExtra("DateFilter", dateFilter.getText().toString());
                 resultIntent.putExtra("TitleFilter", titleFilter.getText().toString());
                 resultIntent.putExtra("DescFilter", descFilter.getText().toString());
+                resultIntent.putExtra("AristFilter", artistFilter.getText().toString());
+                resultIntent.putExtra("MakeFilter", makeFilter.getText().toString());
+                resultIntent.putExtra("ModelFilter", modelFilter.getText().toString());
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
             }
@@ -95,6 +100,9 @@ public class FilterActivity extends AppCompatActivity {
                 dateFilter.setText("");
                 titleFilter.setText("");
                 descFilter.setText("");
+                artistFilter.setText("");
+                makeFilter.setText("");
+                modelFilter.setText("");
             }
         });
     }

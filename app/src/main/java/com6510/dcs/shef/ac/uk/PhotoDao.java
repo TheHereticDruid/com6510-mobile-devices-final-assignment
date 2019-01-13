@@ -19,6 +19,9 @@ public interface PhotoDao {
     @Query("DELETE FROM Photo WHERE im_path LIKE :path")
     void deletePhoto(String path);
 
+    @Query("DELETE FROM Photo WHERE im_path IN (:paths)")
+    void deletePhotos(List<String> paths);
+
     @Query("SELECT * FROM Photo ORDER BY im_timestamp DESC")
     LiveData<List<Photo>> getAllPhotos();
 
@@ -31,6 +34,12 @@ public interface PhotoDao {
     @Query("DELETE FROM Photo")
     void deleteAllPhotos();
 
-    @Query("SELECT * FROM Photo WHERE im_title LIKE :title AND im_description like :description AND im_datetime LIKE :date")
-    LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date);
+    @Query("SELECT * FROM Photo " +
+            "WHERE im_title LIKE :title " +
+            "AND im_description like :description " +
+            "AND im_datetime LIKE :date " +
+            "AND im_artist LIKE :artist " +
+            "AND im_make LIKE :make " +
+            "AND im_model LIKE :model")
+    LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date, String artist, String make, String model);
 }

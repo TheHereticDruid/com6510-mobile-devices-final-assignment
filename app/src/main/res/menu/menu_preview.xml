@@ -10,7 +10,12 @@
         app:showAsAction="never" />
     <item
         android:id="@+id/show_metadata"
-        android:title="Show metadata"
+        android:title="@string/show_metadata"
         android:icon="@drawable/ic_info_outline_white_24dp"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/show_map_location"
+        android:title="@string/show_map_location"
+        android:icon="@drawable/ic_location_on_black_24dp"
         app:showAsAction="always" />
 </menu>

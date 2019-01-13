@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -42,6 +39,33 @@
         android:hint="@string/desc_filter_hint"
         android:inputType="text"
         android:layout_below="@id/titleFilter"/>
+
+    <EditText
+        android:id="@+id/artistFilter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:hint="@string/artist_filter_hint"
+        android:inputType="text"
+        android:layout_below="@id/descFilter"/>
+
+    <EditText
+        android:id="@+id/makeFilter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:hint="@string/make_filter_hint"
+        android:inputType="text"
+        android:layout_below="@id/artistFilter"/>
+
+    <EditText
+        android:id="@+id/modelFilter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:hint="@string/model_filter_hint"
+        android:inputType="text"
+        android:layout_below="@id/makeFilter"/>
 
     <Button style="@style/Widget.AppCompat.Button.Borderless"
         android:id="@+id/resetButton"

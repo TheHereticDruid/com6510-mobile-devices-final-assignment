@@ -33,7 +33,7 @@ public class GalleryRepository extends ViewModel {
     /* ------------ DB wrappers ------------- */
 
     public Photo getPhoto(String path) {
-        Photo photo = new Photo(path, "", 0, "", "", 0, 0, false, "");
+        Photo photo = new Photo(path, "", 0, "", "", 0, 0, false, "", "", "", "");
         new GetAsyncTask(dbDao).execute(photo);
         return photo;
     }
@@ -50,8 +50,8 @@ public class GalleryRepository extends ViewModel {
         return photos;
     }
 
-    public LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date) {
-        return dbDao.getFilteredPhotos(title, description, date);
+    public LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date, String artist, String make, String model) {
+        return dbDao.getFilteredPhotos(title, description, date, artist, make, model);
     }
 
     public List<Photo> getAllPhotosSync() {
@@ -161,13 +161,15 @@ public class GalleryRepository extends ViewModel {
             }
 
             /* delete photos from db that do not exist anymore */
+            List<String> pathsToBeDeleted = new LinkedList<>();
             for (Photo photo : db_photos) {
                 if (pathsToBeIndexed.contains(photo.getImPath()) == false) {
                     /* delete this photo from db */
                     System.out.println("Db entry does not exist anymore, deleting: " + photo.getImPath());
-                    mDao.deletePhoto(photo.getImPath());
+                    pathsToBeDeleted.add(photo.getImPath());
                 }
             }
+            mDao.deletePhotos(pathsToBeDeleted);
 
             /* create thumbnail dir if not already created */
             File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
@@ -203,11 +205,8 @@ public class GalleryRepository extends ViewModel {
                             Util.getNewThumbnailPath(context),
                             file.lastModified(),
                             file.getName(),
-                            "Add a description!",
-                            0,
-                            0,
-                            false,
-                            "");
+                            "", 0, 0,false,
+                            "", "" , "", "");
                     /* timestamp is set so that order of photos remains invariant as they appear on grid */
                     photosToInsert.add(photo);
                 }

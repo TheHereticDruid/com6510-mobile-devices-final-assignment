@@ -27,8 +27,8 @@ public class GalleryViewModel extends AndroidViewModel {
         return photos;
     }
 
-    LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date) {
-        return repository.getFilteredPhotos(title, description, date);
+    LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date, String artist, String make, String model) {
+        return repository.getFilteredPhotos(title, description, date, artist, make, model);
     }
 
     List<Photo> getAllPhotosSync() { return repository.getAllPhotosSync(); }

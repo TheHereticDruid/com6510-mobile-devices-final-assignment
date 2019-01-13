@@ -7,16 +7,12 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ConfigurationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -32,9 +28,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,6 +71,9 @@ public class BrowseActivity extends AppCompatActivity {
     private String filter_title;
     private String filter_description;
     private String filter_date;
+    private String filter_artist;
+    private String filter_make;
+    private String filter_model;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -148,6 +145,9 @@ public class BrowseActivity extends AppCompatActivity {
         filter_title = "";
         filter_date = "";
         filter_description = "";
+        filter_artist = "";
+        filter_make = "";
+        filter_model = "";
 
         /* build viewmodel */
         viewModel = ViewModelProviders.of(this).get(GalleryViewModel.class);
@@ -161,7 +161,7 @@ public class BrowseActivity extends AppCompatActivity {
         viewModel.refreshDatabase(getApplicationContext());
 
         /* set up observers */
-        setFilteredObserver("", "", "");
+        setFilteredObserver("", "", "", "", "", "");
 
         /* floating button to manually add photos from gallery */
         final FloatingActionButton fabGallery = (FloatingActionButton) findViewById(R.id.fab_gallery);
@@ -194,6 +194,9 @@ public class BrowseActivity extends AppCompatActivity {
                 filterIntent.putExtra("TitleFilter", filter_title);
                 filterIntent.putExtra("DateFilter", filter_date);
                 filterIntent.putExtra("DescFilter", filter_description);
+                filterIntent.putExtra("ArtistFilter", filter_artist);
+                filterIntent.putExtra("MakeFilter", filter_make);
+                filterIntent.putExtra("ModelFilter", filter_model);
                 startActivityForResult(filterIntent, INTENT_FILTER);
             }
         });
@@ -251,17 +254,14 @@ public class BrowseActivity extends AppCompatActivity {
                             Util.getNewThumbnailPath(getApplicationContext()),
                             file.lastModified(),
                             file.getName(),
-                            "Add a description!",
-                            0,
-                            0,
-                            false,
-                            "");
+                            "", 0, 0, false, "", "", "", "");
                     Util.readPhotoMetadata(photo);
                     Util.makeThumbnail(photo.getImPath(), photo.getImThumbPath());
                     /* store GPS location if photo taken from camera */
                     if (source == EasyImage.ImageSource.CAMERA) {
                         try {
                             if (Util.isEmulator()) {
+                                /* UOS DCS */
                                 photo.setImLat(53.381028f);
                                 photo.setImLng(-1.480318f);
                                 photo.setImHasCoordinates(true);
@@ -312,8 +312,11 @@ public class BrowseActivity extends AppCompatActivity {
             filter_title = extras.getString("TitleFilter", "");
             filter_description = extras.getString("DescFilter", "");
             filter_date = extras.getString("DateFilter", "");
+            filter_artist = extras.getString("ArtistFilter", "");
+            filter_make = extras.getString("MakeFilter", "");
+            filter_model = extras.getString("ModelFilter", "");
             /* update filter observer */
-            setFilteredObserver(filter_title, filter_description, filter_date);
+            setFilteredObserver(filter_title, filter_description, filter_date, filter_artist, filter_make, filter_model);
         }
     }
 
@@ -364,9 +367,19 @@ public class BrowseActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setFilteredObserver(String title, String description, String date) {
-        System.out.println("Setting observer with filters title=" + title + ", description=" + description + ", date=" + date);
-        viewModel.getFilteredPhotos("%"+title+"%", "%"+description+"%", "%"+date+"%")
+    private void setFilteredObserver(String title, String description, String date, String artist, String make, String model) {
+        System.out.println("Setting observer with filters title=" + title
+                + ", description=" + description
+                + ", date=" + date
+                + ", artist=" + artist
+                + ", make=" + make
+                + ", model=" + model);
+        viewModel.getFilteredPhotos("%"+title+"%",
+                "%"+description+"%",
+                "%"+date+"%",
+                "%"+artist+"%",
+                "%"+make+"%",
+                "%"+model+"%")
                 .observe(this, new Observer<List<Photo>>(){
             @Override
             public void onChanged(@Nullable final List<Photo> photos) {

@@ -6,13 +6,16 @@
     <string name="title_activity_filter">Filter</string>
     <string name="title_activity_edit">Edit metadata</string>
     <string name="reset_app">Clear app data</string>
-    <string name="no_photos_available">Add some photos, will you?</string>
+    <string name="no_photos_available">No photos found!</string>
     <string name="filter_button_text">Filter</string>
     <string name="reset_button_text">Reset</string>
     <string name="filter_instructions">Enter search terms below. Set a field blank to exclude it from the filter.</string>
     <string name="date_filter_hint">Date Filter</string>
     <string name="title_filter_hint">Title Filter</string>
     <string name="desc_filter_hint">Description Filter</string>
+    <string name="artist_filter_hint">Artist Filter</string>
+    <string name="make_filter_hint">Make Filter</string>
+    <string name="model_filter_hint">Model Filter</string>
     <string name="edit_metadata">Edit metadata</string>
     <string name="edit_instructions">Enter new metadata for the image below.</string>
     <string name="edit_date">Edit Date</string>
@@ -20,6 +23,11 @@
     <string name="edit_description">Edit Description</string>
     <string name="edit_latitude">Edit Latitude</string>
     <string name="edit_longitude">Edit Longitude</string>
+    <string name="edit_artist">Edit Artist</string>
+    <string name="edit_make">Edit Make</string>
+    <string name="edit_model">Edit Model</string>
     <string name="edit_button_text">Save</string>
     <string name="date_format">yyyy:MM:dd</string>
+    <string name="show_metadata">Show metadata</string>
+    <string name="show_map_location">Show map location</string>
 </resources>

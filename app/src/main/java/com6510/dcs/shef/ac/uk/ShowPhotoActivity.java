@@ -1,12 +1,9 @@
 package com6510.dcs.shef.ac.uk;
 
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -16,7 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
@@ -25,8 +21,6 @@ public class ShowPhotoActivity extends AppCompatActivity {
 
     private Photo photo;
     private Bitmap bitmap;
-
-    private final int INTENT_EDIT = 3838;
 
     private GalleryViewModel viewModel;
 
@@ -64,6 +58,10 @@ public class ShowPhotoActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_preview, menu);
+        /* hide location button if not exist */
+        if (photo.getImHasCoordinates() == false) {
+            menu.removeItem(R.id.show_map_location);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -73,13 +71,16 @@ public class ShowPhotoActivity extends AppCompatActivity {
         if (id == R.id.edit_metadata) {
             Intent editIntent = new Intent(getApplicationContext(), EditActivity.class);
             editIntent.putExtra("Photo", photo);
-            startActivityForResult(editIntent, INTENT_EDIT);
+            startActivityForResult(editIntent, 0);
         } else if (id == R.id.show_metadata) {
             /* build info string */
-            String message = "Title: " + photo.getImTitle() + "\n"
-                    + "Description: " + photo.getImDescription() + "\n"
-                    + "Date taken: " + photo.getImDateTime() + "\n"
-                    + "Location: " + photo.getImLat() + ", " + photo.getImLng() + "\n";
+            String message = "TITLE\n" + photo.getImTitle() + "\n\n"
+                    + "DESCRIPTION\n " + photo.getImDescription() + "\n\n"
+                    + "DATE TAKEN\n" + photo.getImDateTime() + "\n\n"
+                    + "LOCATION\n" + photo.getImLat() + ", " + photo.getImLng() + "\n\n"
+                    + "ARTIST\n" + photo.getImArtist() + "\n\n"
+                    + "MAKE\n" + photo.getImMake() + "\n\n"
+                    + "MODEL\n" + photo.getImModel();
             AlertDialog.Builder builder;
             builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
             builder.setTitle("Photo metadata")
@@ -92,6 +93,10 @@ public class ShowPhotoActivity extends AppCompatActivity {
                     .setIcon(android.R.drawable.ic_dialog_info)
                     .show();
             return true;
+        } else if (id == R.id.show_map_location) {
+            Intent mapIntent = new Intent(getApplicationContext(), ShowPhotoLocationActivity.class);
+            mapIntent.putExtra("Photo", photo);
+            startActivityForResult(mapIntent, 0);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -99,6 +104,7 @@ public class ShowPhotoActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK) {
+            /* result from edit */
             Bundle extras = data.getExtras();
             photo = (Photo) extras.get("Photo");
             Util.writePhotoMetadata(photo);

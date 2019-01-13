@@ -41,13 +41,14 @@ public class Photo implements Parcelable {
     @ColumnInfo(name = "im_datetime")
     private String imDateTime;
 
-    /*
+    @ColumnInfo(name = "im_artist")
     private String imArtist;
 
+    @ColumnInfo(name = "im_make")
     private String imMake;
 
+    @ColumnInfo(name = "im_model")
     private String imModel;
-    */
 
     @Ignore
     private Bitmap imThumbnail;
@@ -61,7 +62,10 @@ public class Photo implements Parcelable {
                  float imLat,
                  float imLng,
                  boolean imHasCoordinates,
-                 String imDateTime) {
+                 String imDateTime,
+                 String imArtist,
+                 String imMake,
+                 String imModel) {
         this.imPath = imPath;
         this.imThumbPath = imThumbPath;
         this.imTimestamp = imTimestamp;
@@ -71,6 +75,9 @@ public class Photo implements Parcelable {
         this.imLng = imLng;
         this.imHasCoordinates = imHasCoordinates;
         this.imDateTime = imDateTime;
+        this.imArtist = imArtist;
+        this.imMake = imMake;
+        this.imModel = imModel;
     }
 
     public Photo(Parcel in) {
@@ -83,6 +90,9 @@ public class Photo implements Parcelable {
         this.imLng = in.readFloat();
         this.imHasCoordinates = in.readByte() != 0;
         this.imDateTime = in.readString();
+        this.imArtist = in.readString();
+        this.imMake = in.readString();
+        this.imModel = in.readString();
     }
 
     /* ------------ getters and setters ---------------*/
@@ -166,6 +176,30 @@ public class Photo implements Parcelable {
         this.imHasCoordinates = hasCoordinates;
     }
 
+    public String getImArtist() {
+        return imArtist;
+    }
+
+    public void setImArtist(String imArtist) {
+        this.imArtist = imArtist;
+    }
+
+    public String getImMake() {
+        return imMake;
+    }
+
+    public void setImMake(String imMake) {
+        this.imMake = imMake;
+    }
+
+    public String getImModel() {
+        return imModel;
+    }
+
+    public void setImModel(String imModel) {
+        this.imModel = imModel;
+    }
+
     /* ------------ other -------------------- */
     @Override
     public String toString() {
@@ -176,7 +210,10 @@ public class Photo implements Parcelable {
                 + ", imLat=" + imLat
                 + ", imLng=" + imLng
                 + ", imThumbPath=" + imThumbPath
-                + ", imTimestamp" + imTimestamp;
+                + ", imTimestamp" + imTimestamp
+                + ", imArtist" + imArtist
+                + ", imMake" + imMake
+                + ", imModel" + imModel;
     }
 
     /* --------------------- parcels -------------------- */
@@ -191,6 +228,9 @@ public class Photo implements Parcelable {
         dest.writeFloat(this.imLng);
         dest.writeByte((byte)(this.imHasCoordinates ? 1 : 0));
         dest.writeString(this.imDateTime);
+        dest.writeString(this.imArtist);
+        dest.writeString(this.imMake);
+        dest.writeString(this.imModel);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

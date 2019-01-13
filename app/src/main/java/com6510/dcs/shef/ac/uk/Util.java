@@ -9,7 +9,6 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -96,7 +95,7 @@ public class Util {
 
     /* https://developer.android.com/guide/topics/media/camera#java */
     public static boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             // this device has a camera
             return true;
         } else {
@@ -126,38 +125,39 @@ public class Util {
             String val;
             if ((val = exifInterface.getAttribute("Title")) != null) {
                 photo.setImTitle(val);
-            }
-            else {
+            } else {
                 photo.setImTitle(file.getName());
             }
             // Description
             if ((val = exifInterface.getAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION)) != null) {
                 photo.setImDescription(val);
-            }
-            else {
-                photo.setImDescription("");
+            } else {
+                photo.setImDescription("Add description!");
             }
             // DateTime
             if ((val = exifInterface.getAttribute(ExifInterface.TAG_DATETIME)) != null) {
                 photo.setImDateTime(val);
+            } else {
+                photo.setImDateTime("Add date taken!");
             }
-            else {
-                photo.setImDateTime("");
-            }
-            /*
             // Artist
             if ((val = exifInterface.getAttribute(ExifInterface.TAG_ARTIST)) != null) {
                 photo.setImArtist(val);
+            } else {
+                photo.setImArtist("Add artist!");
             }
             // Make
             if ((val = exifInterface.getAttribute(ExifInterface.TAG_MAKE)) != null) {
                 photo.setImMake(val);
+            } else {
+                photo.setImMake("Add camera manufacturer!");
             }
             // Model
             if ((val = exifInterface.getAttribute(ExifInterface.TAG_MODEL)) != null) {
                 photo.setImModel(val);
+            } else {
+                photo.setImModel("Add camera model!");
             }
-            */
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -183,20 +183,12 @@ public class Util {
             exifInterface.setAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION, photo.getImDescription());
             // DateTime
             exifInterface.setAttribute(ExifInterface.TAG_DATETIME, photo.getImDateTime());
-            /*
             // Artist
-            if ((val = exifInterface.getAttribute(ExifInterface.TAG_ARTIST)) != null) {
-                photo.setImArtist(val);
-            }
+            exifInterface.setAttribute(ExifInterface.TAG_ARTIST, photo.getImArtist());
             // Make
-            if ((val = exifInterface.getAttribute(ExifInterface.TAG_MAKE)) != null) {
-                photo.setImMake(val);
-            }
+            exifInterface.setAttribute(ExifInterface.TAG_MAKE, photo.getImMake());
             // Model
-            if ((val = exifInterface.getAttribute(ExifInterface.TAG_MODEL)) != null) {
-                photo.setImModel(val);
-            }
-            */
+            exifInterface.setAttribute(ExifInterface.TAG_MODEL, photo.getImModel());
             exifInterface.saveAttributes();
         } catch (IOException e) {
             e.printStackTrace();
@@ -257,5 +249,12 @@ public class Util {
                 || Build.MANUFACTURER.contains("Genymotion")
                 || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
                 || "google_sdk".equals(Build.PRODUCT);
+    }
+
+    public static String getPrettyTrimmedString(String s, int limit) {
+        if (s.trim().length() > limit-3) {
+            s = s.trim().substring(0, limit-3) + "...";
+        }
+        return s;
     }
 }

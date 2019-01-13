@@ -2,20 +2,14 @@ package com6510.dcs.shef.ac.uk;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
@@ -31,6 +25,9 @@ public class EditActivity extends AppCompatActivity {
     private EditText descEdit;
     private EditText latEdit;
     private EditText lngEdit;
+    private EditText artistEdit;
+    private EditText makeEdit;
+    private EditText modelEdit;
 
     final Calendar calendar = Calendar.getInstance();
 
@@ -53,6 +50,9 @@ public class EditActivity extends AppCompatActivity {
         descEdit = (EditText) findViewById(R.id.edit_description);
         latEdit = (EditText) findViewById(R.id.edit_latitude);
         lngEdit = (EditText) findViewById(R.id.edit_longitude);
+        artistEdit = (EditText) findViewById(R.id.edit_artist);
+        makeEdit = (EditText) findViewById(R.id.edit_make);
+        modelEdit = (EditText) findViewById(R.id.edit_model);
 
         Bundle sourceExtras = getIntent().getExtras();
         photo=(Photo) sourceExtras.get("Photo");
@@ -61,6 +61,9 @@ public class EditActivity extends AppCompatActivity {
         descEdit.setText(photo.getImDescription());
         latEdit.setText(photo.getImHasCoordinates() ? Float.toString(photo.getImLat()) : "");
         lngEdit.setText(photo.getImHasCoordinates() ? Float.toString(photo.getImLng()) : "");
+        artistEdit.setText(photo.getImArtist());
+        makeEdit.setText(photo.getImMake());
+        modelEdit.setText(photo.getImModel());
 
         /* set date picker to popup on clicking text view */
         final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
@@ -101,6 +104,9 @@ public class EditActivity extends AppCompatActivity {
                         return;
                     }
                 }
+                photo.setImArtist(artistEdit.getText().toString());
+                photo.setImMake(makeEdit.getText().toString());
+                photo.setImModel(modelEdit.getText().toString());
                 resultIntent.putExtra("Photo", photo);
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();

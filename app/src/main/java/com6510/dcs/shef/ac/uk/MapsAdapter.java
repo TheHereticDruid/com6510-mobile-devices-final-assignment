@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
