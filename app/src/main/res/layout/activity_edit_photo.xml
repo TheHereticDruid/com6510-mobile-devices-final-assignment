@@ -64,7 +64,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
         android:hint="@string/edit_artist"
-        android:inputType="numberDecimal"
+        android:inputType="text"
         android:layout_below="@id/edit_longitude" />
 
     <EditText
@@ -73,7 +73,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
         android:hint="@string/edit_make"
-        android:inputType="numberDecimal"
+        android:inputType="text"
         android:layout_below="@id/edit_artist" />
 
     <EditText
@@ -82,7 +82,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="10dp"
         android:hint="@string/edit_model"
-        android:inputType="numberDecimal"
+        android:inputType="text"
         android:layout_below="@id/edit_make" />
 
     <Button style="@style/Widget.AppCompat.Button.Borderless"
