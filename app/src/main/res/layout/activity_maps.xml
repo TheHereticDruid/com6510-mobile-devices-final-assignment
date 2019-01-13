@@ -15,17 +15,19 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/imgSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginBottom="@dimen/fab_margin"
-            android:layout_marginEnd="@dimen/fab_margin"
-            android:layout_above="@id/imgStrip"
-            android:src="@drawable/ic_filter_list_black_24dp" />
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/ic_filter_list_black_24dp"
+            app:fabSize="normal" />
 
         <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/imgStrip"
@@ -34,6 +36,7 @@
             android:layout_marginBottom="@dimen/strip_thumbnail_margin_half"
             android:layout_marginStart="@dimen/strip_thumbnail_margin_half"
             android:layout_marginEnd="@dimen/strip_thumbnail_margin_half"
-            android:layout_alignParentBottom="true"/>
+            android:layout_alignParentBottom="true"
+            />
     </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

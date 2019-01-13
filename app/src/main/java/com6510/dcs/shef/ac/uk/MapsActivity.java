@@ -11,6 +11,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
@@ -140,6 +141,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 filterIntent.putExtra("DateFilter", filter_date);
                 filterIntent.putExtra("DescFilter", filter_description);
                 startActivityForResult(filterIntent, 0);
+            }
+        });
+
+        /* auto hide floating button */
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dx > 0) {
+                    mSearch.hide();
+                } else if (dx < 0) {
+                    mSearch.show();
+                }
             }
         });
     }
