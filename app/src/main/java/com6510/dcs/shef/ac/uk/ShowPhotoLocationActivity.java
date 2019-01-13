@@ -47,6 +47,6 @@ public class ShowPhotoLocationActivity extends FragmentActivity implements OnMap
         mMap.addMarker(new MarkerOptions()
                 .position(coords)
                 .title(photo.getImTitle()));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(coords,10.0f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(coords,18.0f));
     }
 }

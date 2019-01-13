@@ -265,6 +265,10 @@ public class BrowseActivity extends AppCompatActivity {
                                 photo.setImLat(53.381028f);
                                 photo.setImLng(-1.480318f);
                                 photo.setImHasCoordinates(true);
+                                /* edit metadata before saving image */
+                                Intent editIntent = new Intent(getApplicationContext(), EditActivity.class);
+                                editIntent.putExtra("Photo", photo);
+                                startActivityForResult(editIntent, INTENT_EDIT);
                             } else {
                                 mFusedLocationClient.getLastLocation().addOnSuccessListener(activity, new OnSuccessListener<Location>() {
                                     @Override
@@ -287,8 +291,10 @@ public class BrowseActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     } else {
-                        /* just insert in db */
-                        viewModel.insertPhoto(photo);
+                        /* edit metadata before saving image */
+                        Intent editIntent = new Intent(getApplicationContext(), EditActivity.class);
+                        editIntent.putExtra("Photo", photo);
+                        startActivityForResult(editIntent, INTENT_EDIT);
                     }
                 }
             }
