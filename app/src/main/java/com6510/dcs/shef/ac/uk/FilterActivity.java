@@ -85,7 +85,7 @@ public class FilterActivity extends AppCompatActivity {
                 resultIntent.putExtra("DateFilter", dateFilter.getText().toString());
                 resultIntent.putExtra("TitleFilter", titleFilter.getText().toString());
                 resultIntent.putExtra("DescFilter", descFilter.getText().toString());
-                resultIntent.putExtra("AristFilter", artistFilter.getText().toString());
+                resultIntent.putExtra("ArtistFilter", artistFilter.getText().toString());
                 resultIntent.putExtra("MakeFilter", makeFilter.getText().toString());
                 resultIntent.putExtra("ModelFilter", modelFilter.getText().toString());
                 setResult(Activity.RESULT_OK, resultIntent);
