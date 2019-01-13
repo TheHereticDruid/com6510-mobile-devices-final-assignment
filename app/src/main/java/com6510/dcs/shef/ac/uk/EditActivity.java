@@ -17,7 +17,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
@@ -28,22 +30,15 @@ public class EditActivity extends AppCompatActivity {
     private EditText descEdit;
     private EditText latEdit;
     private EditText lngEdit;
+
+    final Calendar calendar = Calendar.getInstance();
+
     private Photo photo;
 
-    public static class DatePickerDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
-
-        @Override
-        @NonNull
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            Calendar calendar=Calendar.getInstance();
-            return new DatePickerDialog(getActivity(), this, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
-        }
-
-        @Override
-        public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-            EditText dateEditText=(EditText) getActivity().findViewById(R.id.edit_date);
-            dateEditText.setText(day+"-"+(month+1)+"-"+year);
-        }
+    private void updateDateFilter() {
+        String format = getResources().getString(R.string.date_format);
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
+        dateEdit.setText(sdf.format(calendar.getTime()));
     }
 
     @Override
@@ -52,8 +47,6 @@ public class EditActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_photo);
 
-        TextView instructions = (TextView) findViewById(R.id.edit_instructions);
-        instructions.setTextSize(TypedValue.COMPLEX_UNIT_PX, instructions.getTextSize() * 1.5f);
         dateEdit = (EditText) findViewById(R.id.edit_date);
         titleEdit = (EditText) findViewById(R.id.edit_title);
         descEdit = (EditText) findViewById(R.id.edit_description);
@@ -65,15 +58,28 @@ public class EditActivity extends AppCompatActivity {
         dateEdit.setText(photo.getImDateTime());
         titleEdit.setText(photo.getImTitle());
         descEdit.setText(photo.getImDescription());
-        latEdit.setText(Float.toString(photo.getImLat()));
-        lngEdit.setText(Float.toString(photo.getImLng()));
+        latEdit.setText(photo.getImHasCoordinates() ? Float.toString(photo.getImLat()) : "");
+        lngEdit.setText(photo.getImHasCoordinates() ? Float.toString(photo.getImLng()) : "");
 
-        ImageView dateEditPicker=(ImageView) findViewById(R.id.dateEditPicker);
-        dateEditPicker.setOnClickListener(new View.OnClickListener() {
+        /* set date picker to popup on clicking text view */
+        final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, month);
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                updateDateFilter();
+            }
+        };
+        dateEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DialogFragment newFragment = new FilterActivity.DatePickerDialogFragment();
-                newFragment.show(getSupportFragmentManager(), "datePicker");
+                new DatePickerDialog(EditActivity.this,
+                        date,
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH))
+                        .show();
             }
         });
 

@@ -17,7 +17,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
@@ -27,20 +30,12 @@ public class FilterActivity extends AppCompatActivity {
     private EditText titleFilter;
     private EditText descFilter;
 
-    public static class DatePickerDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+    final Calendar calendar = Calendar.getInstance();
 
-        @Override
-        @NonNull
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            Calendar calendar=Calendar.getInstance();
-            return new DatePickerDialog(getActivity(), this, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
-        }
-
-        @Override
-        public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-            EditText dateEditText=(EditText) getActivity().findViewById(R.id.edit_date);
-            dateEditText.setText(day+"-"+(month+1)+"-"+year);
-        }
+    private void updateDateFilter() {
+        String format = getResources().getString(R.string.date_format);
+        SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
+        dateFilter.setText(sdf.format(calendar.getTime()));
     }
 
     @Override
@@ -49,8 +44,6 @@ public class FilterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
 
-        TextView instructions = (TextView) findViewById(R.id.filterInstructions);
-        instructions.setTextSize(TypedValue.COMPLEX_UNIT_PX, instructions.getTextSize() * 1.5f);
         dateFilter = (EditText) findViewById(R.id.dateFilter);
         titleFilter = (EditText) findViewById(R.id.titleFilter);
         descFilter = (EditText) findViewById(R.id.descFilter);
@@ -60,12 +53,25 @@ public class FilterActivity extends AppCompatActivity {
         titleFilter.setText(sourceExtras.getString("TitleFilter"));
         descFilter.setText(sourceExtras.getString("DescFilter"));
 
-        ImageView dateFilterPicker=(ImageView) findViewById(R.id.dateFilterPicker);
-        dateFilterPicker.setOnClickListener(new View.OnClickListener() {
+        /* set date picker to popup on clicking text view */
+        final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, month);
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                updateDateFilter();
+            }
+        };
+        dateFilter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DialogFragment newFragment = new DatePickerDialogFragment();
-                newFragment.show(getSupportFragmentManager(), "datePicker");
+                new DatePickerDialog(FilterActivity.this,
+                        date,
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH))
+                        .show();
             }
         });
 
@@ -79,6 +85,16 @@ public class FilterActivity extends AppCompatActivity {
                 resultIntent.putExtra("DescFilter", descFilter.getText().toString());
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
+            }
+        });
+
+        Button resetButton = (Button) findViewById(R.id.resetButton);
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dateFilter.setText("");
+                titleFilter.setText("");
+                descFilter.setText("");
             }
         });
     }

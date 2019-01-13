@@ -10,10 +10,8 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher_foreground"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
+        android:icon="@mipmap/mountain"
         android:theme="@style/AppTheme">
         <uses-library
             android:name="org.apache.http.legacy"

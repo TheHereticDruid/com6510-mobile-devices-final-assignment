@@ -30,16 +30,24 @@ public class Photo implements Parcelable {
     private String imDescription;
 
     @ColumnInfo(name = "im_lat")
-    float imLat;
+    private float imLat;
 
     @ColumnInfo(name = "im_lng")
-    float imLng;
+    private float imLng;
 
     @ColumnInfo(name = "im_has_coordinates")
-    boolean imHasCoordinates;
+    private boolean imHasCoordinates;
 
     @ColumnInfo(name = "im_datetime")
     private String imDateTime;
+
+    /*
+    private String imArtist;
+
+    private String imMake;
+
+    private String imModel;
+    */
 
     @Ignore
     private Bitmap imThumbnail;
@@ -70,8 +78,11 @@ public class Photo implements Parcelable {
         this.imThumbPath = in.readString();
         this.imTimestamp = in.readLong();
         this.imTitle = in.readString();
+        this.imDescription = in.readString();
         this.imLat = in.readFloat();
         this.imLng = in.readFloat();
+        this.imHasCoordinates = in.readByte() != 0;
+        this.imDateTime = in.readString();
     }
 
     /* ------------ getters and setters ---------------*/
@@ -155,6 +166,19 @@ public class Photo implements Parcelable {
         this.imHasCoordinates = hasCoordinates;
     }
 
+    /* ------------ other -------------------- */
+    @Override
+    public String toString() {
+        return "im_path=" + imPath
+                + ", imTitle=" + imTitle
+                + ", imDescription=" + imDescription
+                + ", imDateTime=" +imDateTime
+                + ", imLat=" + imLat
+                + ", imLng=" + imLng
+                + ", imThumbPath=" + imThumbPath
+                + ", imTimestamp" + imTimestamp;
+    }
+
     /* --------------------- parcels -------------------- */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
@@ -162,8 +186,11 @@ public class Photo implements Parcelable {
         dest.writeString(this.imThumbPath);
         dest.writeLong(this.imTimestamp);
         dest.writeString(this.imTitle);
+        dest.writeString(this.imDescription);
         dest.writeFloat(this.imLat);
         dest.writeFloat(this.imLng);
+        dest.writeByte((byte)(this.imHasCoordinates ? 1 : 0));
+        dest.writeString(this.imDateTime);
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {

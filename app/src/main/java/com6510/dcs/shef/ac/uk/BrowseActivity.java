@@ -266,22 +266,33 @@ public class BrowseActivity extends AppCompatActivity {
                                 public void onSuccess(Location location) {
                                     if (location != null) {
                                         System.out.println("Storing GPS data for camera image " + photo.getImPath());
-                                        System.out.println("Coordinates: " + location.getLatitude() + ", " + location.getLongitude());
                                         photo.setImLat((float) location.getLatitude());
                                         photo.setImLng((float) location.getLongitude());
                                         photo.setImHasCoordinates(true);
+                                        System.out.println("Coordinates: " + photo.getImLat() + ", " + photo.getImLng());
                                     }
+                                    /* edit metadata before saving image */
+                                    Intent editIntent = new Intent(getApplicationContext(), EditActivity.class);
+                                    editIntent.putExtra("Photo", photo);
+                                    startActivityForResult(editIntent, INTENT_EDIT);
                                 }
                             });
-                            Intent editIntent=new Intent(getApplicationContext(), EditActivity.class);
-                            editIntent.putExtra("Photo", photo);
-                            startActivityForResult(editIntent, INTENT_EDIT);
                         } catch (SecurityException e) {
                             e.printStackTrace();
                         }
                     } else {
                         /* just insert in db */
                         viewModel.insertPhoto(photo);
+                    }
+                }
+            }
+
+            @Override
+            public void onCanceled(EasyImage.ImageSource source, int type) {
+                if (source == EasyImage.ImageSource.CAMERA) {
+                    File photoFile = EasyImage.lastlyTakenButCanceledPhoto(BrowseActivity.this);
+                    if (photoFile != null) {
+                        photoFile.delete();
                     }
                 }
             }
@@ -304,7 +315,8 @@ public class BrowseActivity extends AppCompatActivity {
         System.out.println("handleEditResult called");
         if(resultCode == Activity.RESULT_OK) {
             Bundle extras = data.getExtras();
-            Photo newPhoto=(Photo) extras.get("Photo");
+            Photo newPhoto = (Photo) extras.get("Photo");
+            Util.writePhotoMetadata(newPhoto);
             viewModel.insertPhoto(newPhoto);
         }
     }

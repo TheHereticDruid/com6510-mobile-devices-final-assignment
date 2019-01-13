@@ -39,7 +39,7 @@ public class ShowPhotoActivity extends AppCompatActivity {
         Bundle data = getIntent().getExtras();
         photo = (Photo) data.getParcelable("photo");
 
-        viewModel= ViewModelProviders.of(this).get(GalleryViewModel.class);
+        viewModel = ViewModelProviders.of(this).get(GalleryViewModel.class);
 
         ImageView image = findViewById(R.id.image_preview);
         bitmap = BitmapFactory.decodeFile(photo.getImPath());
@@ -71,7 +71,7 @@ public class ShowPhotoActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.edit_metadata) {
-            Intent editIntent=new Intent(getApplicationContext(), EditActivity.class);
+            Intent editIntent = new Intent(getApplicationContext(), EditActivity.class);
             editIntent.putExtra("Photo", photo);
             startActivityForResult(editIntent, INTENT_EDIT);
         } else if (id == R.id.show_metadata) {
@@ -100,7 +100,8 @@ public class ShowPhotoActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK) {
             Bundle extras = data.getExtras();
-            photo=(Photo) extras.get("Photo");
+            photo = (Photo) extras.get("Photo");
+            Util.writePhotoMetadata(photo);
             viewModel.insertPhoto(photo);
         }
     }

@@ -22,17 +22,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
         android:hint="@string/edit_date"
-        android:inputType="date"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/dateEditPicker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="360dp"
-        android:layout_marginTop="92dp"
-        android:src="@drawable/ic_date_range_black_24dp"
+        android:clickable="true"
+        android:cursorVisible="false"
+        android:focusable="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

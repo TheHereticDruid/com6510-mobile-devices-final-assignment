@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -156,20 +157,60 @@ public class Util {
             else {
                 photo.setImDateTime("");
             }
-                /*
-                // Artist
-                if ((val = exifInterface.getAttribute(ExifInterface.TAG_ARTIST)) != null) {
-                    photo.setImArtist(val);
-                }
-                // Make
-                if ((val = exifInterface.getAttribute(ExifInterface.TAG_MAKE)) != null) {
-                    photo.setImMake(val);
-                }
-                // Model
-                if ((val = exifInterface.getAttribute(ExifInterface.TAG_MODEL)) != null) {
-                    photo.setImModel(val);
-                }
-                */
+            /*
+            // Artist
+            if ((val = exifInterface.getAttribute(ExifInterface.TAG_ARTIST)) != null) {
+                photo.setImArtist(val);
+            }
+            // Make
+            if ((val = exifInterface.getAttribute(ExifInterface.TAG_MAKE)) != null) {
+                photo.setImMake(val);
+            }
+            // Model
+            if ((val = exifInterface.getAttribute(ExifInterface.TAG_MODEL)) != null) {
+                photo.setImModel(val);
+            }
+            */
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void writePhotoMetadata(Photo photo) {
+        File file = new File(photo.getImPath());
+        /* update timestamp */
+        long newTimestamp = new Date().getTime();
+        photo.setImTimestamp(newTimestamp);
+        file.setLastModified(newTimestamp);
+        /* update EXIF metadata in file */
+        try {
+            ExifInterface exifInterface = new ExifInterface(file.getAbsolutePath());
+            // Coordinates
+            if (photo.getImHasCoordinates()) {
+                exifInterface.setAttribute(ExifInterface.TAG_GPS_LATITUDE, Float.toString(photo.getImLat()));
+                exifInterface.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, Float.toString(photo.getImLng()));
+            }
+            // Title
+            exifInterface.setAttribute("Title", photo.getImTitle());
+            // Description
+            exifInterface.setAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION, photo.getImDescription());
+            // DateTime
+            exifInterface.setAttribute(ExifInterface.TAG_DATETIME, photo.getImDateTime());
+            /*
+            // Artist
+            if ((val = exifInterface.getAttribute(ExifInterface.TAG_ARTIST)) != null) {
+                photo.setImArtist(val);
+            }
+            // Make
+            if ((val = exifInterface.getAttribute(ExifInterface.TAG_MAKE)) != null) {
+                photo.setImMake(val);
+            }
+            // Model
+            if ((val = exifInterface.getAttribute(ExifInterface.TAG_MODEL)) != null) {
+                photo.setImModel(val);
+            }
+            */
+            exifInterface.saveAttributes();
         } catch (IOException e) {
             e.printStackTrace();
         }
