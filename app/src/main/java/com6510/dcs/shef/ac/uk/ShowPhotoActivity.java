@@ -100,8 +100,8 @@ public class ShowPhotoActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK) {
             Bundle extras = data.getExtras();
-            Photo newPhoto=(Photo) extras.get("Photo");
-            viewModel.insertPhoto(newPhoto);
+            photo=(Photo) extras.get("Photo");
+            viewModel.insertPhoto(photo);
         }
     }
 }

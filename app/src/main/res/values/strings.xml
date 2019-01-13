@@ -14,7 +14,7 @@
     <string name="title_filter_hint">Title Filter</string>
     <string name="desc_filter_hint">Description Filter</string>
     <string name="edit_metadata">Edit metadata</string>
-    <string name="edit_instructions">Edit Title and Description of the image below</string>
+    <string name="edit_instructions">Edit Metadata of the image below</string>
     <string name="edit_date">Edit Date</string>
     <string name="edit_title">Edit Title</string>
     <string name="edit_description">Edit Description</string>
