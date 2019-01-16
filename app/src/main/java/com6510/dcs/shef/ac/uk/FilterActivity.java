@@ -17,6 +17,9 @@ import java.util.Locale;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
+/**
+ * Filter Activity to receive old filters, let the user choose new ones and return them to the calling activity.
+ */
 public class FilterActivity extends AppCompatActivity {
 
     private EditText dateFilter;
@@ -28,18 +31,28 @@ public class FilterActivity extends AppCompatActivity {
 
     final Calendar calendar = Calendar.getInstance();
 
+    /**
+     * Set date filter text to picked date.
+     */
     private void updateDateFilter() {
         String format = getResources().getString(R.string.date_format);
         SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
         dateFilter.setText(sdf.format(calendar.getTime()));
     }
 
+    /**
+     * On Create
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter);
 
+        /*
+         * Retrieve all Edit Texts
+         */
         dateFilter = (EditText) findViewById(R.id.dateFilter);
         titleFilter = (EditText) findViewById(R.id.titleFilter);
         descFilter = (EditText) findViewById(R.id.descFilter);
@@ -47,6 +60,9 @@ public class FilterActivity extends AppCompatActivity {
         makeFilter = (EditText) findViewById(R.id.makeFilter);
         modelFilter = (EditText) findViewById(R.id.modelFilter);
 
+        /*
+         * Set original filter values
+         */
         Bundle sourceExtras = getIntent().getExtras();
         dateFilter.setText(sourceExtras.getString("DateFilter"));
         titleFilter.setText(sourceExtras.getString("TitleFilter"));
@@ -76,7 +92,7 @@ public class FilterActivity extends AppCompatActivity {
                         .show();
             }
         });
-
+        /*Filter button*/
         Button filterButton = (Button) findViewById(R.id.filterButton);
         filterButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,7 +108,7 @@ public class FilterActivity extends AppCompatActivity {
                 finish();
             }
         });
-
+        /*Reset button*/
         Button resetButton = (Button) findViewById(R.id.resetButton);
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override

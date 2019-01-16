@@ -8,6 +8,10 @@ import android.arch.persistence.room.Query;
 
 import java.util.List;
 
+/**
+ * Photo Data Access Object, to manage database functionality. Some specific queries are marked as LiveData as well.
+ * The last one is for filtering, which comes with the added wildcard chars before and after each element in the filter.
+ */
 @Dao
 public interface PhotoDao {
     @Query("SELECT * FROM Photo WHERE im_path LIKE :path")

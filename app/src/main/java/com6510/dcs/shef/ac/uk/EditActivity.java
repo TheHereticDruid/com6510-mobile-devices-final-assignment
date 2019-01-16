@@ -18,6 +18,9 @@ import java.util.Locale;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
+/**
+ * Activity to edit metadata of images. Takes input from user and returns it to parent activity. This is done this way to not repeat ourselves.
+ */
 public class EditActivity extends AppCompatActivity {
 
     private EditText titleEdit;
@@ -33,18 +36,26 @@ public class EditActivity extends AppCompatActivity {
 
     private Photo photo;
 
+    /**
+     * Update date string according to picker
+     */
     private void updateDateFilter() {
         String format = getResources().getString(R.string.date_format);
         SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
         dateEdit.setText(sdf.format(calendar.getTime()));
     }
 
+    /**
+     * On Create
+     * @param savedInstanceState State
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_photo);
 
+        /*Find all required edit texts*/
         dateEdit = (EditText) findViewById(R.id.edit_date);
         titleEdit = (EditText) findViewById(R.id.edit_title);
         descEdit = (EditText) findViewById(R.id.edit_description);
@@ -54,6 +65,7 @@ public class EditActivity extends AppCompatActivity {
         makeEdit = (EditText) findViewById(R.id.edit_make);
         modelEdit = (EditText) findViewById(R.id.edit_model);
 
+        /*Set old values to the edit texts*/
         Bundle sourceExtras = getIntent().getExtras();
         photo=(Photo) sourceExtras.get("Photo");
         dateEdit.setText(photo.getImDateTime());
@@ -75,6 +87,7 @@ public class EditActivity extends AppCompatActivity {
                 updateDateFilter();
             }
         };
+        /*On selecting a date it is pushed to the edit text*/
         dateEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,6 +101,7 @@ public class EditActivity extends AppCompatActivity {
         });
 
         Button editButton = (Button) findViewById(R.id.edit_submit);
+        /*Send back the new updated data and close the intent*/
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

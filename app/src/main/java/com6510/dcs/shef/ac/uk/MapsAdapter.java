@@ -14,10 +14,16 @@ import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
+/**
+ * Class to handle managing the data bound to the MapsActivity.
+ */
 public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder> {
     private List<Photo> mDataset;
     WeakReference<Context> mContextWeakReference;
 
+    /**
+     * Class to assign an Image View to the ViewHolder
+     */
     public static class MapsViewHolder extends RecyclerView.ViewHolder {
         public ImageView mImageView;
         public MapsViewHolder(ImageView imageView) {
@@ -26,10 +32,18 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
         }
     }
 
+    /**
+     * Constructor
+     * @param context Context
+     */
     public MapsAdapter(Context context) {
         this.mContextWeakReference = new WeakReference<>(context);
     }
 
+    /**
+     * Reset the current map data
+     * @param newData List of photos to be included in the map
+     */
     public void resetDataset(List<Photo> newData) {
         mDataset = new LinkedList<Photo>(newData);
         /* remove photos without GPS data */
@@ -41,6 +55,12 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
         notifyDataSetChanged();
     }
 
+    /**
+     * On creating the ViewHolder, add image thumbnails
+     * @param parent Parent View
+     * @param viewType View Type
+     * @return The MapsViewHolder
+     */
     @Override
     public MapsAdapter.MapsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // create a new view
@@ -48,6 +68,11 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
         return new MapsViewHolder(view);
     }
 
+    /**
+     * When the viewholder is bound, the following is run.
+     * @param holder View Holder in question
+     * @param position Photo identification
+     */
     @Override
     public void onBindViewHolder(MapsViewHolder holder, int position) {
         final Context context = mContextWeakReference.get();
@@ -61,6 +86,10 @@ public class MapsAdapter extends RecyclerView.Adapter<MapsAdapter.MapsViewHolder
         });
     }
 
+    /**
+     * Get item count.
+     * @ Item count
+     */
     @Override
     public int getItemCount() {
         if (mDataset == null) {

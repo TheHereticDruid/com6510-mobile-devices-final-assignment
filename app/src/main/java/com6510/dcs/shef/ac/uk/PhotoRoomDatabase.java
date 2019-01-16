@@ -7,6 +7,9 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+/**
+ * Room D class
+ */
 @Database(entities = {Photo.class}, version = 1, exportSchema = false)
 public abstract class PhotoRoomDatabase extends RoomDatabase {
     public abstract PhotoDao photoDao();
@@ -22,6 +25,11 @@ public abstract class PhotoRoomDatabase extends RoomDatabase {
                 }
             };
 
+    /**
+     * Returns the DB object
+     * @param context Context
+     * @return The Database
+     */
     public static PhotoRoomDatabase getDatabase(final Context context) {
         saved_context = context;
         if (INSTANCE == null) {

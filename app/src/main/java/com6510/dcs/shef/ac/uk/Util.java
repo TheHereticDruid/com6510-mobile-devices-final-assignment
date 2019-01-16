@@ -23,8 +23,15 @@ import java.util.UUID;
 
 import pl.aprilapps.easyphotopicker.EasyImage;
 
+/**
+ * Utility methods
+ */
 public class Util {
-
+    /**
+     * Return a list of declared permissions
+     * @param context Context
+     * @return List of declared and granted permissions
+     */
     public static Set<String> getDeclaredPermissions(Context context) {
         try {
             String[] grantedPermissions = context
@@ -38,6 +45,10 @@ public class Util {
         return new HashSet<String>();
     }
 
+    /**
+     * Initialize the EasyImage package
+     * @param context Context
+     */
     public static void initEasyImage(Context context) {
         EasyImage.configuration(context)
                 .setImagesFolderName("TinyGallery")
@@ -46,25 +57,47 @@ public class Util {
                 .setAllowMultiplePickInGallery(true);
     }
 
+    /**
+     * Class to perform differentials
+     */
     public static class MyDiffCallback extends DiffUtil.Callback {
         List<Photo> oldList;
         List<Photo> newList;
 
+        /**
+         * Constructor
+         * @param oldList Old List
+         * @param newList New List
+         */
         public MyDiffCallback(List<Photo> oldList, List<Photo> newList) {
             this.oldList = oldList;
             this.newList = newList;
         }
 
+        /**
+         * Get size of old list
+         * @return Size of old List
+         */
         @Override
         public int getOldListSize() {
             return oldList.size();
         }
 
+        /**
+         * Get size of new list
+         * @return Size of new List
+         */
         @Override
         public int getNewListSize() {
             return newList.size();
         }
 
+        /**
+         * Check if two items are the same based on position
+         * @param oldItemPosition Position of the old item
+         * @param newItemPosition Position of the new item
+         * @return True if same
+         */
         @Override
         public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
             String old_path = oldList.get(oldItemPosition).getImPath();
@@ -73,6 +106,12 @@ public class Util {
             return res;
         }
 
+        /**
+         * Check if two items have the same contents
+         * @param oldItemPosition Position of the old item
+         * @param newItemPosition Position of the new item
+         * @return True if same
+         */
         @Override
         public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
             long old_ts = oldList.get(oldItemPosition).getImTimestamp();
@@ -80,6 +119,12 @@ public class Util {
             return old_ts == new_ts;
         }
 
+        /**
+         * Get the Change Payload, if the items are the same, but the contents are not.
+         * @param oldItemPosition Position of the old item
+         * @param newItemPosition Position of the new item
+         * @return Change Payload, if it exists, else Null
+         */
         @Nullable
         @Override
         public Object getChangePayload(int oldItemPosition, int newItemPosition) {
@@ -87,12 +132,22 @@ public class Util {
         }
     }
 
+    /**
+     * Generate a new Thumbnail path
+     * @param context Context
+     * @return New thumbnail path
+     */
     public static String getNewThumbnailPath(Context context) {
         File thumbnailDir = new File(context.getCacheDir(), "thumbnails");
         File thumbnailFile = new File(thumbnailDir, UUID.randomUUID().toString());
         return thumbnailFile.getAbsolutePath();
     }
 
+    /**
+     * Check if the camera sensor exists
+     * @param context Context
+     * @return True if camera exists
+     */
     /* https://developer.android.com/guide/topics/media/camera#java */
     public static boolean checkCameraHardware(Context context) {
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
@@ -104,6 +159,10 @@ public class Util {
         }
     }
 
+    /**
+     * Read Metadata of the photo and retrieve it from the file itself
+     * @param photo Photo in question
+     */
     /* reads photo file and fills in metadata into passed object */
     public static void readPhotoMetadata(Photo photo) {
         File file = new File(photo.getImPath());
@@ -163,6 +222,10 @@ public class Util {
         }
     }
 
+    /**
+     * Write Metadata to a Photo to the file itself
+     * @param photo Photo in question
+     */
     public static void writePhotoMetadata(Photo photo) {
         File file = new File(photo.getImPath());
         /* update timestamp */
@@ -195,6 +258,12 @@ public class Util {
         }
     }
 
+    /**
+     * Make a Thumbnail 100x100 in dimensions
+     * @param photoPath Path of the photo
+     * @param thumbPath Path of the thumbnail
+     * @return Image
+     */
     public static Bitmap makeThumbnail(String photoPath, String thumbPath) {
         /* generate 100x100 thumbnail */
         System.out.println("Building thumbnail for file " + photoPath);
@@ -213,6 +282,12 @@ public class Util {
         return thumbnailBitmap;
     }
 
+    /**
+     * Copy a file into another
+     * @param sourceFile Source File
+     * @param destFile Destination File
+     * @throws IOException
+     */
     /* https://stackoverflow.com/questions/29867121/how-to-copy-programmatically-a-file-to-another-directory */
     public static void copyFile(File sourceFile, File destFile) throws IOException {
         if (!destFile.getParentFile().exists())
@@ -239,6 +314,10 @@ public class Util {
         }
     }
 
+    /**
+     * Check if the device this is running on is an emulator
+     * @return True if it is
+     */
     /* https://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in-the-emulator */
     public static boolean isEmulator() {
         return Build.FINGERPRINT.startsWith("generic")
@@ -251,6 +330,12 @@ public class Util {
                 || "google_sdk".equals(Build.PRODUCT);
     }
 
+    /**
+     * Get a trimmed string
+     * @param s String
+     * @param limit Length of String requied
+     * @return Trimmed String
+     */
     public static String getPrettyTrimmedString(String s, int limit) {
         if (s.trim().length() > limit-3) {
             s = s.trim().substring(0, limit-3) + "...";

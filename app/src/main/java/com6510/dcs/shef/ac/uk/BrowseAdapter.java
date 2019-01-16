@@ -18,11 +18,21 @@ import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
+/**
+ * Adapter for the Main Activity. Helps create the Recycler View
+ */
 public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewHolder> {
 
+    /**
+     * Class to hold Image Views for the grid in the gallery
+     */
     class ImageViewHolder extends RecyclerView.ViewHolder  {
         private final ImageView photoItemView;
 
+        /**
+         * Constructor to locate the view
+         * @param itemView View to search in.
+         */
         private ImageViewHolder(View itemView) {
             super(itemView);
             photoItemView = itemView.findViewById(R.id.photo_item);
@@ -37,6 +47,11 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
 
     Bitmap emptyThumbnail;
 
+    /**
+     * Constructor.
+     * @param context Context
+     * @param viewModel View Model
+     */
     public BrowseAdapter(Context context, GalleryViewModel viewModel) {
         this.context = context;
         this.viewModel = viewModel;
@@ -44,6 +59,12 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         emptyThumbnail = BitmapFactory.decodeResource(context.getResources(), R.drawable.blank_square);
     }
 
+    /**
+     * When the View Holder is created, inflate the appropriate layout into it.
+     * @param parent Parent View
+     * @param viewType View Type
+     * @return Image View Holder
+     */
     @Override
     public ImageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         //Inflate the layout, initialize the View Holder
@@ -51,6 +72,11 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         return new ImageViewHolder(v);
     }
 
+    /**
+     * When the View Holder is bound to the data item
+     * @param holder ImageViewHolder
+     * @param position Identifier for the Photo
+     */
     @Override
     public void onBindViewHolder(final ImageViewHolder holder, final int position) {
         /* Use the provided View Holder on the onCreateViewHolder method to populate the
@@ -76,6 +102,10 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         });
     }
 
+    /**
+     * Get count of photos in the list
+     * @return Count of photos
+     */
     @Override
     public int getItemCount() {
         if (photos == null) {
@@ -84,11 +114,19 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         return photos.size();
     }
 
+    /**
+     * Set the photos in the Recycler View/
+     * @param photos List of Photos
+     */
     public void setPhotos(List<Photo> photos) {
         this.photos = photos;
         notifyDataSetChanged();
     }
 
+    /**
+     * Set the photo differential
+     * @param photos List of new photos
+     */
     public void setPhotosDiff(List<Photo> photos) {
         Util.MyDiffCallback diffCallback = new Util.MyDiffCallback(this.photos, photos);
         DiffUtil.DiffResult result = DiffUtil.calculateDiff(diffCallback);
@@ -97,9 +135,17 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         result.dispatchUpdatesTo(this);
     }
 
+    /**
+     * Async class to Load a single photo
+     */
     private class LoadSinglePhotoTask extends AsyncTask<HolderAndPosition, Void, Bitmap> {
         HolderAndPosition holderAndPosition;
 
+        /**
+         * Async method to retrieve one single photo
+         * @param holderAndPositions Identifier for the Photo
+         * @return Bitmap image
+         */
         @Override
         protected Bitmap doInBackground(HolderAndPosition... holderAndPositions) {
             holderAndPosition = holderAndPositions[0];
@@ -137,6 +183,10 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
             return thumbnailBitmap;
         }
 
+        /**
+         * When the call is executed
+         * @param bitmap Image
+         */
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             if (bitmap != null) {
@@ -145,10 +195,18 @@ public class BrowseAdapter extends RecyclerView.Adapter<BrowseAdapter.ImageViewH
         }
     }
 
+    /**
+     * Class for identifying Photos
+     */
     private class HolderAndPosition {
         int position;
         BrowseAdapter.ImageViewHolder holder;
 
+        /**
+         * Constructor.
+         * @param position Position
+         * @param holder ViewHolder
+         */
         public HolderAndPosition(int position, BrowseAdapter.ImageViewHolder holder) {
             this.position = position;
             this.holder = holder;

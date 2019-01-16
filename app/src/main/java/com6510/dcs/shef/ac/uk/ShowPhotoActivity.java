@@ -17,6 +17,9 @@ import android.widget.ImageView;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
+/**
+ * Class to show a single photo. Creates menu options for the editing anf map visualization of the photo
+ */
 public class ShowPhotoActivity extends AppCompatActivity {
 
     private Photo photo;
@@ -24,6 +27,10 @@ public class ShowPhotoActivity extends AppCompatActivity {
 
     private GalleryViewModel viewModel;
 
+    /**
+     * On Create
+     * @param savedInstanceState State
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -55,6 +62,11 @@ public class ShowPhotoActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * On the Menu being created. Only keep the Map icon if the photo has a location
+     * @param menu Menu in question
+     * @return True for success
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_preview, menu);
@@ -65,6 +77,11 @@ public class ShowPhotoActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * On selecting an option from the menu
+     * @param item Selected item
+     * @return True for success
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -94,6 +111,7 @@ public class ShowPhotoActivity extends AppCompatActivity {
                     .show();
             return true;
         } else if (id == R.id.show_map_location) {
+            /*Send an intent to edit the photo, with old data parcelled*/
             Intent mapIntent = new Intent(getApplicationContext(), ShowPhotoLocationActivity.class);
             mapIntent.putExtra("Photo", photo);
             startActivityForResult(mapIntent, 0);
@@ -101,6 +119,12 @@ public class ShowPhotoActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * On receiving edited data. Add it back to the DB.
+     * @param requestCode Request Code
+     * @param resultCode Response Code
+     * @param data Data received
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK) {

@@ -17,12 +17,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+Gallery Repo object, which is a View Model Implementation as well
+ */
 public class GalleryRepository extends ViewModel {
     private PhotoDao dbDao;
     private LiveData<List<Photo>> photos;
     private LiveData<List<Photo>> filteredPhotos;
     private PhotoRoomDatabase db;
 
+    /**
+     * Constructor. Init the DAO here, along with the DB itself
+     * @param application Application
+     */
     public GalleryRepository(Application application) {
         db = PhotoRoomDatabase.getDatabase(application);
         dbDao = db.photoDao();
@@ -32,36 +39,74 @@ public class GalleryRepository extends ViewModel {
 
     /* ------------ DB wrappers ------------- */
 
+    /**
+     * Get Photo from DB
+     * @param path Primary Key
+     * @return Photo in question
+     */
     public Photo getPhoto(String path) {
         Photo photo = new Photo(path, "", 0, "", "", 0, 0, false, "", "", "", "");
         new GetAsyncTask(dbDao).execute(photo);
         return photo;
     }
 
+    /**
+     * Insert Photo into DB
+     * @param photo Photo in question
+     */
     public void insertPhoto(Photo photo) {
         new InsertAsyncTask(dbDao).execute(photo);
     }
 
+    /**
+     * Delete Photo from DB
+     * @param path Primary Key
+     */
     public void deletePhoto(String path) {
         new DeleteAsyncTask(dbDao).execute(path);
     }
 
+    /**
+     * Get all Photos in the DB using LiveData
+     * @return All photos
+     */
     public LiveData<List<Photo>> getAllPhotos() {
         return photos;
     }
 
+    /**
+     * Get Photos from the DB using some filtered requirements. Defaults to no filters
+     * @param title Title
+     * @param description Description
+     * @param date Date
+     * @param artist Artist
+     * @param make Make
+     * @param model Model
+     * @return List of photos
+     */
     public LiveData<List<Photo>> getFilteredPhotos(String title, String description, String date, String artist, String make, String model) {
         return dbDao.getFilteredPhotos(title, description, date, artist, make, model);
     }
 
+    /**
+     * Get all photos in the DB synchronously
+     * @return List of photos
+     */
     public List<Photo> getAllPhotosSync() {
         return dbDao.getAllPhotosSync();
     }
 
+    /**
+     * Delete all photos in DB
+     */
     public void deleteAll() {
         new DeleteAllAsyncTask(dbDao).execute();
     }
 
+    /**
+     * Refresh the DB, locating all photos afresh.
+     * @param context Context
+     */
     public void refreshDatabase(Context context) {
         System.out.println("Starting scan async task");
         new ScanAsyncTask(db, context).execute();
@@ -69,13 +114,25 @@ public class GalleryRepository extends ViewModel {
 
     /* --------- Async DB implementations -----------*/
 
+    /**
+     * Async class for Getting a Photo
+     */
     private static class GetAsyncTask extends AsyncTask<Photo, Void, LiveData<Photo>> {
         private PhotoDao mAsyncTaskDao;
 
+        /**
+         * Constructor
+         * @param dao DAO of Photo
+         */
         GetAsyncTask(PhotoDao dao) {
             mAsyncTaskDao = dao;
         }
 
+        /**
+         * Async method to retrieve one Photo
+         * @param params Parameters
+         * @return Photo
+         */
         @Override
         protected LiveData<Photo> doInBackground(final Photo... params) {
             Photo photo = params[0];
@@ -83,13 +140,25 @@ public class GalleryRepository extends ViewModel {
         }
     }
 
+    /**
+     * Async class for Inserting a Photo
+     */
     private static class InsertAsyncTask extends AsyncTask<Photo, Void, Void> {
         private PhotoDao mAsyncTaskDao;
 
+        /**
+         * Constructor
+         * @param dao DAO of Photo
+         */
         InsertAsyncTask(PhotoDao dao) {
             mAsyncTaskDao = dao;
         }
 
+        /**
+         * Async method to insert one photo
+         * @param params Parameters
+         * @return Void
+         */
         @Override
         protected Void doInBackground(final Photo... params) {
             mAsyncTaskDao.insertPhoto(params[0]);
@@ -97,13 +166,25 @@ public class GalleryRepository extends ViewModel {
         }
     }
 
+    /**
+     * Async Class for Deleting from DB
+     */
     private static class DeleteAsyncTask extends AsyncTask<String, Void, Void> {
         private PhotoDao mAsyncTaskDao;
 
+        /**
+         * Constructor
+         * @param dao DAO of Photo
+         */
         DeleteAsyncTask(PhotoDao dao) {
             mAsyncTaskDao = dao;
         }
 
+        /**
+         * Async method to delete one photo
+         * @param params Parameters
+         * @return Void
+         */
         @Override
         protected Void doInBackground(final String... params) {
             mAsyncTaskDao.deletePhoto(params[0]);
@@ -111,13 +192,25 @@ public class GalleryRepository extends ViewModel {
         }
     }
 
+    /**
+     * Async class for Deleting all from DB
+     */
     private static class DeleteAllAsyncTask extends AsyncTask<Void, Void, Void> {
         private PhotoDao mAsyncTaskDao;
 
+        /**
+         * Constructor
+         * @param dao DAO of Photo
+         */
         DeleteAllAsyncTask(PhotoDao dao) {
             mAsyncTaskDao = dao;
         }
 
+        /**
+         * Async method to delete all photos
+         * @param params Parameters
+         * @return Void
+         */
         @Override
         protected Void doInBackground(final Void... params) {
             mAsyncTaskDao.deleteAllPhotos();
@@ -125,17 +218,30 @@ public class GalleryRepository extends ViewModel {
         }
     }
 
+    /**
+     * Async Class for Refreshing the DB
+     */
     private static class ScanAsyncTask extends AsyncTask<Void, Void, Void> {
         private Context context;
         private PhotoDao mDao;
         PhotoRoomDatabase db;
 
+        /**
+         * Constructor
+         * @param db Database Object
+         * @param context Context
+         */
         ScanAsyncTask(PhotoRoomDatabase db, Context context) {
             this.db = db;
             this.mDao = db.photoDao();
             this.context = context;
         }
 
+        /**
+         * Async method to scan the file system and retrieve and store all photos
+         * @param params
+         * @return
+         */
         @Override
         protected Void doInBackground(final Void... params) {
             /* current db photos */

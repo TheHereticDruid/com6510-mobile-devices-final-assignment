@@ -10,6 +10,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
+/**
+ * Photo object. This is the basic unit of the database. The image path is the primary key.
+ */
 @Entity(indices = {@Index(value = {"im_path"}, unique = true)})
 public class Photo implements Parcelable {
     @PrimaryKey
@@ -80,6 +83,10 @@ public class Photo implements Parcelable {
         this.imModel = imModel;
     }
 
+    /**
+     * Constructor to create a Photo object from a Parcel
+     * @param in Parcel in question
+     */
     public Photo(Parcel in) {
         this.imPath = in.readString();
         this.imThumbPath = in.readString();

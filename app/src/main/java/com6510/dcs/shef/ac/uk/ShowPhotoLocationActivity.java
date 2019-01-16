@@ -13,11 +13,18 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
+/**
+ * Class to show the location of a given photo on a map. This is meant to supplement the single image view. Shows just the location of the image.
+ */
 public class ShowPhotoLocationActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private Photo photo;
 
+    /**
+     * On Create
+     * @param savedInstanceState State
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +38,11 @@ public class ShowPhotoLocationActivity extends FragmentActivity implements OnMap
         mapFragment.getMapAsync(this);
     }
 
+    /**
+     * On Map ready. Place a marker at the required location and zoom to it.
+     * @param googleMap Map in question
+     * @throws SecurityException
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) throws SecurityException{
         mMap = googleMap;

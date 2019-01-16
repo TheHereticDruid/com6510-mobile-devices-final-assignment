@@ -44,6 +44,9 @@ import pl.aprilapps.easyphotopicker.Constants;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;
 
+/**
+ * Main Activity of the app. Runs a Grid based Recycler view to dynamically list photos
+ */
 public class BrowseActivity extends AppCompatActivity {
     
     /* ViewModel */
@@ -75,6 +78,10 @@ public class BrowseActivity extends AppCompatActivity {
     private String filter_make;
     private String filter_model;
 
+    /**
+     * On Create. Get the Location client, and all required permissions
+     * @param savedInstanceState State
+     */
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
@@ -93,6 +100,9 @@ public class BrowseActivity extends AppCompatActivity {
         requestPermissions();
     }
 
+    /**
+     * Request permissions, listing them all
+     */
     void requestPermissions() {
         String[] permissions = {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -105,6 +115,12 @@ public class BrowseActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(activity, permissions, 0);
     }
 
+    /**
+     * On receiving a response from request permissions
+     * @param requestCode Request Code
+     * @param permissions Response Code
+     * @param grantResults Results of whether the permissions were granted or not
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -130,6 +146,10 @@ public class BrowseActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Main setup method of the activity. Set filters to null, Set up the observer to the data.
+     * Set up the Floating buttons and menu items for the intent transitions.
+     */
     void setup() {
         /* set up grid */
         recyclerView = findViewById(R.id.grid_recycler_view);
@@ -223,6 +243,12 @@ public class BrowseActivity extends AppCompatActivity {
         Util.initEasyImage(getApplicationContext());
     }
 
+    /**
+     * If the request was for an EasyImage call, process it here
+     * @param requestCode Request Code
+     * @param resultCode Response Code
+     * @param data Data returned
+     */
     protected void handleEasyImageResult(int requestCode, int resultCode, Intent data) {
         EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
             @Override
@@ -311,6 +337,12 @@ public class BrowseActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * If the request was for filtering process it here. Add the filters and re-observe data
+     * @param requestCode Request Code
+     * @param resultCode Response Code
+     * @param data Data
+     */
     void handleFilterResult(int requestCode, int resultCode, Intent data) {
         System.out.println("handleFilterResult called");
         if(resultCode == Activity.RESULT_OK) {
@@ -326,6 +358,12 @@ public class BrowseActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * This is for when a new photo is taken by the camera. The metadata is requested before saving it.
+     * @param requestCode Request Code
+     * @param resultCode Response Code
+     * @param data Data
+     */
     void handleEditResult(int requestCode, int resultCode, Intent data) {
         System.out.println("handleEditResult called");
         if(resultCode == Activity.RESULT_OK) {
@@ -336,6 +374,9 @@ public class BrowseActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Decide based on Request code what kind of request it is and route it accordingly.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -349,16 +390,30 @@ public class BrowseActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Return the activity
+     * @return The Activity
+     */
     public Activity getActivity() {
         return this;
     }
 
+    /**
+     * On creating the menu
+     * @param menu Menu in question
+     * @return True if success
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * If an option on the menu is selected
+     * @param item Selected item
+     * @return True if success
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -373,6 +428,15 @@ public class BrowseActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Set a filter-based observer on LiveData. Defaults to no filters for any elements
+     * @param title Title
+     * @param description Description
+     * @param date Date
+     * @param artist Artist
+     * @param make Make
+     * @param model Model
+     */
     private void setFilteredObserver(String title, String description, String date, String artist, String make, String model) {
         System.out.println("Setting observer with filters title=" + title
                 + ", description=" + description

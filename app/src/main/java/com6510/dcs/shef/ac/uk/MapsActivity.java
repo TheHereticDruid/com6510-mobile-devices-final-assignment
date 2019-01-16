@@ -33,6 +33,11 @@ import java.util.List;
 
 import com6510.dcs.shef.ac.uk.gallery.R;
 
+/**
+ * Maps Activity, used for section 1.1.2. All images with locations are loaded onto this activity. Thumbnails are listed at the bottom.
+ * All such images also have markers on the map. Clicking on a thumbnail zooms in on the marker. Clicking on the marker shows the details of the image.
+ * The current location button is also provided on the top-left corner. There is also a filter option, which sends an intent to FilterActivity
+ */
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, MapsInterface {
 
     /* maps */
@@ -55,19 +60,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String filter_make;
     private String filter_model;
 
+    /**
+     * This class is to create a custom marker. We add in all details we feel are relevant to the marker and add the thumbnail as well.
+     */
     public class MarkerInfoAdapter implements GoogleMap.InfoWindowAdapter {
 
         private final View markerInfoView;
 
+        /**
+         * Constructor. Retrieve the relevant layout.
+         */
         public MarkerInfoAdapter(){
             markerInfoView = getLayoutInflater().inflate(R.layout.marker_info_window, null);
         }
 
+        /**
+         * Null method
+         * @param marker Marker
+         * @return null Always
+         */
         @Override
         public View getInfoWindow(Marker marker){
             return null;
         }
 
+        /**
+         * Method to override the default marker code with the custom marker
+         * @param marker Marker in question
+         * @return A View which shows the required values including the thumbnail.
+         */
         @Override
         public View getInfoContents(Marker marker) {
             HashMap<String, String> extraValues = (HashMap<String, String>) marker.getTag();
@@ -92,6 +113,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /**
+     * On create for the Maps Activity
+     * @param savedInstanceState State
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,6 +146,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mRecyclerView.setAdapter(mAdapter);
 
         mSearch = (FloatingActionButton) findViewById(R.id.imgSearch);
+        /* Call the filter intent */
         mSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -149,6 +175,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    /**
+     * Method to setup map after it's been loaded. Set the Marker Info Window to the custom marker, and begin observing for data.
+     * @param googleMap Map Object
+     * @throws SecurityException
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) throws SecurityException{
         mMap = googleMap;
@@ -159,12 +190,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setFilteredObserver(filter_title, filter_description, filter_date, filter_artist, filter_make, filter_model);
     }
 
+    /**
+     * Called on clicking on a thumbnail. Move the map to the image's location.
+     * @param photo Photo whose thumbnail has been clicked
+     */
     @Override
     public void thumbnailClick(Photo photo){
         LatLng movLoc = new LatLng(photo.getImLat(), photo.getImLng());
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(movLoc,21.0f));
     }
 
+    /**
+     * Populate the map with photo markers.
+     * @param photos List of hotos
+     */
     private void populateMap(List<Photo> photos) {
         mMap.clear();
         for(Photo photo : photos) {
@@ -191,6 +230,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    /**
+     * Setup the Live Data observer for the required data. Can also filter if needed, by any of the params.
+     * @param title Title
+     * @param description Description
+     * @param date Date
+     * @param artist Artist
+     * @param make Make
+     * @param model Model
+     */
     private void setFilteredObserver(String title, String description, String date, String artist, String make, String model) {
         galleryViewModel.getFilteredPhotos("%"+title+"%",
                 "%"+description+"%",
@@ -219,6 +267,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }});
     }
 
+    /**
+     * Receive and process data from the Filter activity. Used to set filter params for the LiveData observer
+     * @param req Request code
+     * @param res Response code
+     * @param data Data returned
+     */
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
         super.onActivityResult(req, res, data);
