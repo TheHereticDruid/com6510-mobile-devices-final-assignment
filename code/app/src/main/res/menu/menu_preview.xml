@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com6510.dcs.shef.ac.uk.BrowseActivity">
+    tools:context="com6510.oak.shef.ac.uk.BrowseActivity">
     <item
         android:id="@+id/edit_metadata"
         android:orderInCategory="100"

@@ -1,4 +1,4 @@
-package com6510.dcs.shef.ac.uk;
+package com6510.oak.shef.ac.uk;
 
 import android.app.Activity;
 import android.arch.lifecycle.Observer;
@@ -31,7 +31,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import com6510.dcs.shef.ac.uk.gallery.R;
+import com6510.oak.shef.ac.uk.gallery.R;
 
 /**
  * Maps Activity, used for section 1.1.2. All images with locations are loaded onto this activity. Thumbnails are listed at the bottom.

@@ -1,4 +1,4 @@
-package com6510.dcs.shef.ac.uk;
+package com6510.oak.shef.ac.uk;
 
 import android.Manifest;
 import android.app.Activity;
@@ -39,7 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com6510.dcs.shef.ac.uk.gallery.R;
+import com6510.oak.shef.ac.uk.gallery.R;
 import pl.aprilapps.easyphotopicker.Constants;
 import pl.aprilapps.easyphotopicker.DefaultCallback;
 import pl.aprilapps.easyphotopicker.EasyImage;

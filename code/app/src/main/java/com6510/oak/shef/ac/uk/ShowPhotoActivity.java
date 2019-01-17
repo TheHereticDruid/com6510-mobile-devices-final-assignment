@@ -1,4 +1,4 @@
-package com6510.dcs.shef.ac.uk;
+package com6510.oak.shef.ac.uk;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -15,7 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
-import com6510.dcs.shef.ac.uk.gallery.R;
+import com6510.oak.shef.ac.uk.gallery.R;
 
 /**
  * Class to show a single photo. Creates menu options for the editing anf map visualization of the photo

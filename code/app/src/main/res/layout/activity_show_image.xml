@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
-    tools:context="com6510.dcs.shef.ac.uk.ShowPhotoActivity">
+    tools:context="com6510.oak.shef.ac.uk.ShowPhotoActivity">
 
     <ImageView
         android:id="@+id/image_preview"

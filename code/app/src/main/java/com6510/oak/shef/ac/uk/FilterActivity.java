@@ -1,4 +1,4 @@
-package com6510.dcs.shef.ac.uk;
+package com6510.oak.shef.ac.uk;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import com6510.dcs.shef.ac.uk.gallery.R;
+import com6510.oak.shef.ac.uk.gallery.R;
 
 /**
  * Filter Activity to receive old filters, let the user choose new ones and return them to the calling activity.

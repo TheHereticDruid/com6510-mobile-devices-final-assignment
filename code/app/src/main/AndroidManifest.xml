@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com6510.dcs.shef.ac.uk.gallery">
+    package="com6510.oak.shef.ac.uk.gallery">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -22,7 +22,7 @@
             android:value="@string/google_maps_key"></meta-data>
 
         <activity
-            android:name="com6510.dcs.shef.ac.uk.BrowseActivity"
+            android:name="com6510.oak.shef.ac.uk.BrowseActivity"
             android:theme="@style/splashScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,20 +31,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com6510.dcs.shef.ac.uk.ShowPhotoActivity"
+            android:name="com6510.oak.shef.ac.uk.ShowPhotoActivity"
             android:label="@string/title_activity_show_image"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com6510.dcs.shef.ac.uk.MapsActivity"
+            android:name="com6510.oak.shef.ac.uk.MapsActivity"
             android:label="@string/title_activity_map"></activity>
         <activity
-            android:name="com6510.dcs.shef.ac.uk.FilterActivity"
+            android:name="com6510.oak.shef.ac.uk.FilterActivity"
             android:label="@string/title_activity_filter"></activity>
         <activity
-            android:name="com6510.dcs.shef.ac.uk.EditActivity"
+            android:name="com6510.oak.shef.ac.uk.EditActivity"
             android:label="@string/title_activity_edit"></activity>
         <activity
-            android:name="com6510.dcs.shef.ac.uk.ShowPhotoLocationActivity">
+            android:name="com6510.oak.shef.ac.uk.ShowPhotoLocationActivity">
         </activity>
     </application>
 

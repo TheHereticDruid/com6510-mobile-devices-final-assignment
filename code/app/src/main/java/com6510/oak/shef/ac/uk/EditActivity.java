@@ -1,4 +1,4 @@
-package com6510.dcs.shef.ac.uk;
+package com6510.oak.shef.ac.uk;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import com6510.dcs.shef.ac.uk.gallery.R;
+import com6510.oak.shef.ac.uk.gallery.R;
 
 /**
  * Activity to edit metadata of images. Takes input from user and returns it to parent activity. This is done this way to not repeat ourselves.

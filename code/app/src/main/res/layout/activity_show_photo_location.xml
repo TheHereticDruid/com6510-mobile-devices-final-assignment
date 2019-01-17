@@ -10,6 +10,6 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com6510.dcs.shef.ac.uk.ShowPhotoLocation" />
+        tools:context="com6510.oak.shef.ac.uk.ShowPhotoLocation" />
 
 </android.support.constraint.ConstraintLayout>

@@ -1,4 +1,4 @@
-package com6510.dcs.shef.ac.uk.gallery;
+package com6510.oak.shef.ac.uk.gallery;
 
 import org.junit.Test;
 

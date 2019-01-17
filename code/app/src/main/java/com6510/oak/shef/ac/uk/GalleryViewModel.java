@@ -1,4 +1,4 @@
-package com6510.dcs.shef.ac.uk;
+package com6510.oak.shef.ac.uk;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
